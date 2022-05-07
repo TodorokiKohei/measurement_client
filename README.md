@@ -1,0 +1,2 @@
+# measurement_client
+メッセージングシステムの測定用クライアント
