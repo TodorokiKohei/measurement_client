@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  nats-1:
+    container_name: "nats-1"
+    image: "nats:2.8-alpine"
+    volumes:
+      - type: bind
+        source: "./nats/nats-1/configs"
+        target: "/tmp/configs"
+      # - type: bind
+      #   source: "./nats/nats-1/data"
+      #   target: "/tmp/data"
+    command: "-c /tmp/configs/js.conf"
+
+  nats-2:
+    container_name: "nats-2"
+    image: "nats:2.8-alpine"
+    volumes:
+      - type: bind
+        source: "./nats/nats-2/configs"
+        target: "/tmp/configs"
+      # - type: bind
+      #   source: "./nats/nats-2/data"
+      #   target: "/tmp/data"
+    command: "-c /tmp/configs/js.conf"
+    depends_on:
+      - nats-1
+
+  nats-3:
+    container_name: "nats-3"
+    image: "nats:2.8-alpine"
+    volumes:
+      - type: bind
+        source: "./nats/nats-3/configs"
+        target: "/tmp/configs"
+      # - type: bind
+      #   source: "./nats/nats-3/data"
+      #   target: "/tmp/data"
+    command: "-c /tmp/configs/js.conf"
+    depends_on:
+      - nats-1
+
+  nats-box:
+    container_name: nats-box
+    image: natsio/nats-box
+    volumes:
+      - type: bind
+        source: "./nats/nats-box"
+        target: "/tmp/configs"
+    tty: true
+    stdin_open: true
+    depends_on:
+      - nats-1
+      - nats-2
+      - nats-3
+    command: "/tmp/configs/setup_jetsream.sh"
+
+  clients:
+    container_name: "clients"
+    build: ./clients
+    volumes:
+      - type: bind
+        source: "./clients"
+        target: "/code"
+    tty: true
+    stdin_open: true
