@@ -6,10 +6,9 @@ public abstract class AbstractClient {
     AbstractClient(String clientId){
         this.clientId = clientId;
     }
-
     public String getClientId() {
         return clientId;
     }
 
-    
+    public abstract void close();
 }
