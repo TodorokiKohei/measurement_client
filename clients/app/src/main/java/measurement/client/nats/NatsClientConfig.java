@@ -4,7 +4,7 @@ public abstract class NatsClientConfig {
     private String server;
     private String stream;
     private String subject;
-    private int number;
+    private int number = 0;
 
     public String getServer() {
         return server;

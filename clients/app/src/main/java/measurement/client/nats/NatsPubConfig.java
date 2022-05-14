@@ -1,14 +1,14 @@
 package measurement.client.nats;
 
-public class NatsPubConf extends NatsClientConfig {
-    private String messageRate;
-    private long messageSize;
+public class NatsPubConfig extends NatsClientConfig {
+    private String messageRate = "0";
+    private String messageSize;
 
     public String getMessageRate() {
         return messageRate;
     }
 
-    public long getMessageSize() {
+    public String getMessageSize() {
         return messageSize;
     }
 
@@ -16,7 +16,7 @@ public class NatsPubConf extends NatsClientConfig {
         this.messageRate = messageRate;
     }
 
-    public void setMessageSize(long messageSize) {
+    public void setMessageSize(String messageSize) {
         this.messageSize = messageSize;
     }
 

@@ -2,18 +2,18 @@ package measurement.client.nats;
 
 public class NatsConfigs {
     private long execTime;
-    private NatsPubConf pubConf;
-    private NatsSubConf subConf;
+    private NatsPubConfig pubConf;
+    private NatsSubConfig subConf;
 
     public long getExecTime() {
         return execTime;
     }
 
-    public NatsPubConf getPubConf() {
+    public NatsPubConfig getPubConf() {
         return pubConf;
     }
 
-    public NatsSubConf getSubConf() {
+    public NatsSubConfig getSubConf() {
         return subConf;
     }
 
@@ -21,11 +21,11 @@ public class NatsConfigs {
         this.execTime = execTime;
     }
 
-    public void setPubConf(NatsPubConf pubConf) {
+    public void setPubConf(NatsPubConfig pubConf) {
         this.pubConf = pubConf;
     }
 
-    public void setSubConf(NatsSubConf subConf) {
+    public void setSubConf(NatsSubConfig subConf) {
         this.subConf = subConf;
     }
 }

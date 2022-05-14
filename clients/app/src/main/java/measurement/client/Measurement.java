@@ -79,6 +79,8 @@ public class Measurement {
         logger.info("Start measurement.");
         driver.startMeasurement();
 
+        driver.waitForMeasurement();
+
         logger.info("Stop measurement.");
         driver.stopMeasurement();
 
