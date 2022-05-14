@@ -1,7 +1,9 @@
 package measurement.client;
 
 public abstract class AbstractSubscriber extends AbstractClient{
-    AbstractSubscriber(String clientId){
+    public AbstractSubscriber(String clientId){
         super(clientId);
     }
+
+    public abstract void subscribe();
 }

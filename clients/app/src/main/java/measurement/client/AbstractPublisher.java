@@ -1,7 +1,5 @@
 package measurement.client;
 
-import measurement.client.Measurement;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -28,8 +26,10 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
     @Override
     public void run(){
         if (interval == 0){
+            Measurement.logger.info("Start continuing publish.");
             continuingPublish();
         }else{
+            Measurement.logger.info("Start interval publish.");
             intervalPublish();
         }
     }
@@ -41,20 +41,19 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
             publish();
             count++;
             if (count == 10) break;
-            Measurement.logger.info("Publish " + count);
             try {
                 Thread.sleep(100);
             } catch (Exception e) {
                 
             }
         }
-        Measurement.logger.info("Contiuing publish comlited");
     }
 
     // スレッドは1回Publishして終了する
     public void intervalPublish(){
-        publish();
-        Measurement.logger.info("Interval publish comlited");
+        if (!isTerminated){
+            publish();
+        }
     }
 
     public void terminate(){
@@ -72,6 +71,5 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
             e.printStackTrace();
         }
     }
-
     public abstract void publish();
 }

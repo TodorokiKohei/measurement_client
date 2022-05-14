@@ -1,0 +1,15 @@
+
+execTime: 10
+
+pubConf:
+  server: "nats://nats-1,nats://nats-2"
+  stream: "STREAM"
+  subject: "STREAM.pull"
+  number: 1
+  
+
+# subConf:
+#   server: "nats:nats-1"
+#   stream: "STREAM"
+#   subject: "STREAM.pull"
+#   number: 0

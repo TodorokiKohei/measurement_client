@@ -17,6 +17,7 @@ public class Measurement {
     private CommandLine cmd = null;
     public static final Logger logger = Logger.getLogger(Measurement.class.getName());
 
+    // 引数の解析処理を実行
     private void parseArgs(String[] args){
         Options options = new Options();
         options.addOption(Option.builder("c")
@@ -48,7 +49,9 @@ public class Measurement {
         }
     }
 
+    // loggerの初期設定
     private void initLogger(){
+        // levelの設定（デフォルトではINFO）
         if (cmd.getOptionValue("log-level") == null){
             logger.setLevel(Level.INFO);
         }else{
@@ -61,6 +64,7 @@ public class Measurement {
         initLogger();
         logger.info("Initialization is completed.");
 
+        // Driver(計測を実行する処理が記述されたクラス)を引数を元に作成
         Driver driver = null;
         if (cmd.getOptionValue("d").equals("nats")){
             driver = new NatsDriver(cmd.getOptionValue("config"));
