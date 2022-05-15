@@ -5,7 +5,7 @@ pubConf:
   server: "nats://nats-1,nats://nats-2"
   stream: "STREAM"
   subject: "STREAM.pull"
-  messageRate: "100kB"
+  messageRate: "1kB"
   messageSize: "1kB"
   number: 1
   
@@ -15,7 +15,7 @@ subConf:
   stream: "STREAM"
   subject: "STREAM.pull"
   durable: "pull-consumer"
-  mode: Pull
+  mode: pull
   batchSize: 1
   maxWait: 50
   number: 1

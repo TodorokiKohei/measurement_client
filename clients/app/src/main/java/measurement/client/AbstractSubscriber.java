@@ -1,11 +1,16 @@
 package measurement.client;
 
+import java.util.List;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractSubscriber extends AbstractClient implements Runnable{
+    protected Map<Long, Long> throuputMap;
     protected volatile boolean isTerminated;
 
     protected ScheduledExecutorService service;
@@ -13,6 +18,7 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
 
     public AbstractSubscriber(String clientId) {
         super(clientId);
+        this.throuputMap = new TreeMap<Long, Long>();
         this.isTerminated = false;
     }
 
@@ -22,18 +28,25 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
         future = service.schedule(this, 0, TimeUnit.MILLISECONDS);
     }
 
+    private void recordThrouput(List<Payload> payloads){
+        for(Payload payload: payloads){
+            throuputMap.merge(payload.receivedTime, 1L, Long::sum);
+        }
+    }
+
     @Override
     public void run(){
         // terminateが呼ばれるまでSubscribe処理
         Measurement.logger.info("Start subscribe.");
         while(!isTerminated){
-            subscribe();
+            List<Payload> payloads= subscribe();
+            recordThrouput(payloads);
         }
     }
 
     public void terminate() {
         // 別スレッドのタスクを終了させる
-        if (future.isDone()) {
+        if (!future.isDone()) {
             isTerminated = true;
             future.cancel(false);
         }
@@ -49,5 +62,15 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
             e.printStackTrace();
         }
     }
-    public abstract void subscribe();
+
+    public void printThrouput(){
+        Measurement.logger.info(clientId + "'s throuput results.");
+        Iterator<Map.Entry<Long, Long>> itr = throuputMap.entrySet().iterator();
+        while(itr.hasNext()){
+            Map.Entry<Long, Long> entry = itr.next();
+            Measurement.logger.info("(" + clientId + ") " + entry.getKey() + ":" + entry.getValue());
+        }
+    }
+
+    public abstract List<Payload> subscribe();
 }

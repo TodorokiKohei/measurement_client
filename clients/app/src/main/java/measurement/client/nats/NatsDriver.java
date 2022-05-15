@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -16,47 +17,67 @@ import measurement.client.AbstractSubscriber;
 
 public class NatsDriver extends Driver {
 
+    private static final String resourceName = "/natsconf.yaml";
+
     private NatsConfigs natsConfigs;
     private List<AbstractPublisher> publisher = new ArrayList<>();
     private List<AbstractSubscriber> subscriber = new ArrayList<>();
 
     public NatsDriver(String fileName) {
+        // yaml形式の設定ファイルを読み込み
         InputStream is = null;
         try {
             if (fileName == null) {
-                is = Driver.class.getResourceAsStream("/natsconf.yaml");
-                Measurement.logger.info("Use resource");
+                // 指定がなければクラスパス内のデフォルトファイルを読み込み
+                is = Driver.class.getResourceAsStream(resourceName);
+                Measurement.logger.info("Load resource file.(" + resourceName + ")");
+                if (is == null)
+                    throw new FileNotFoundException();
             } else {
+                // 引数のファイルを読み込み
                 is = new FileInputStream(fileName);
-                Measurement.logger.info("Use argument");
+                Measurement.logger.info("Load argument file.(" + fileName + ")");
             }
         } catch (FileNotFoundException e) {
-            Measurement.logger.warning(fileName + "not found.");
+            if (fileName == null) {
+                Measurement.logger.warning(resourceName + " not found.");
+            } else {
+                Measurement.logger.warning(fileName + " not found.");
+            }
             System.exit(1);
         }
         Yaml yaml = new Yaml();
         natsConfigs = yaml.loadAs(is, NatsConfigs.class);
+        try {
+            if (is != null) {
+                is.close();
+            }
+        } catch (Exception e) {}
     }
 
     @Override
     public void setupClients() {
         NatsPubConfig npc = natsConfigs.getPubConf();
         if (npc != null) {
-            // Publishのメッセージ間隔を計算
-            long interval = Utils.calcMsInterval(npc.getMessageRate(), npc.getMessageSize());
+            // Publishのメッセージ間隔をμsec単位で計算
+            long interval = Utils.calcMicroSecInterval(npc.getMessageRate(), npc.getMessageSize());
+
+            // Publisherの作成
             for (int i = 0; i < natsConfigs.getPubConf().getNumber(); i++) {
                 publisher.add(new NatsPublisher(
                         "publisher-" + i,
                         interval,
+                        (int)Utils.byteStringToDouble(npc.getMessageSize()),
                         npc.getServer(),
                         npc.getStream(),
-                        npc.getSubject(),
-                        Utils.byteStringToDouble(npc.getMessageSize())));
+                        npc.getSubject()));
             }
         }
 
         NatsSubConfig nsc = natsConfigs.getSubConf();
         if (nsc != null) {
+
+            // Subscriberの作成
             for (int i = 0; i < natsConfigs.getSubConf().getNumber(); i++) {
                 subscriber.add(new NatsSubscriber(
                         "subscriber-" + i,
@@ -74,20 +95,20 @@ public class NatsDriver extends Driver {
 
     @Override
     public void startMeasurement() {
-        for (AbstractPublisher pub : publisher) {
-            pub.start();
-        }
         for (AbstractSubscriber sub : subscriber) {
             sub.start();
+        }
+        for (AbstractPublisher pub : publisher) {
+            pub.start();
         }
     }
 
     @Override
     public void waitForMeasurement() {
         try {
-            Thread.sleep(5000);
+            TimeUnit.SECONDS.sleep(natsConfigs.getExecTime());
         } catch (Exception e) {
-            // TODO: handle exception
+            e.printStackTrace();
         }
     }
 
@@ -108,6 +129,16 @@ public class NatsDriver extends Driver {
         }
         for (AbstractSubscriber sub : subscriber) {
             sub.close();
+        }
+    }
+
+    @Override
+    public void printResult(){
+        for (AbstractPublisher pub : publisher) {
+            pub.printThrouput();
+        }
+        for (AbstractSubscriber sub : subscriber) {
+            sub.printThrouput();
         }
     }
 }

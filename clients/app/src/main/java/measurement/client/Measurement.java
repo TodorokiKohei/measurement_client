@@ -86,6 +86,9 @@ public class Measurement {
 
         logger.info("Terminate client connection.");
         driver.treadownClients();
+
+        logger.info("Print client result.");
+        driver.printResult();
     }
 
     public static void main(String[] args) {

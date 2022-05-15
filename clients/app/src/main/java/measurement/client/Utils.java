@@ -2,21 +2,22 @@ package measurement.client;
 
 public class Utils {
 
-    public static long calcMsInterval(String messageRate, String messageSize) {
+    public static long calcMicroSecInterval(String messageRate, String messageSize) {
         if (messageRate == null)
             return 0;
-        return (long)(byteStringToDouble(messageRate) / byteStringToDouble(messageSize));
+        long messageNum = byteStringToDouble(messageRate) / byteStringToDouble(messageSize);
+        return 1000000 / messageNum;
     }
 
-    public static double byteStringToDouble(String byteString) {
+    public static long byteStringToDouble(String byteString) {
         byteString = byteString.toUpperCase();
         String[] splitByteString = byteString.split("MB|KB|B");
-        double byteDouble = Double.parseDouble(splitByteString[0]);
+        long byteLong = Long.parseLong(splitByteString[0]);
         if (byteString.contains("KB")) {
-            byteDouble *= 1000;
+            byteLong *= 1000;
         } else if (byteString.contains("MB")) {
-            byteDouble *= 1000 * 1000;
+            byteLong *= 1000 * 1000;
         }
-        return byteDouble;
+        return byteLong;
     }
 }

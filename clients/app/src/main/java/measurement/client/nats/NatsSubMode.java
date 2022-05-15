@@ -3,8 +3,8 @@ package measurement.client.nats;
 import io.nats.client.api.AckPolicy;
 
 public enum NatsSubMode {
-    Pull("pull"),
-    Push("push");
+    pull("pull"),
+    push("push");
 
     private String mode;
     private NatsSubMode(String mode){
