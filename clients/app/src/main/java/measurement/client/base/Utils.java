@@ -1,4 +1,4 @@
-package measurement.client;
+package measurement.client.base;
 
 public class Utils {
 
@@ -6,7 +6,11 @@ public class Utils {
         if (messageRate == null)
             return 0;
         long messageNum = byteStringToDouble(messageRate) / byteStringToDouble(messageSize);
-        return 1000000 / messageNum;
+        if (messageNum == 0){
+            return 0;
+        } else{
+            return 1000000 / messageNum;
+        }
     }
 
     public static long byteStringToDouble(String byteString) {

@@ -13,9 +13,10 @@ import io.nats.client.Message;
 import io.nats.client.Nats;
 import io.nats.client.PullSubscribeOptions;
 import io.nats.client.PullSubscribeOptions.Builder;
-import measurement.client.AbstractSubscriber;
 import measurement.client.Measurement;
-import measurement.client.Payload;
+import measurement.client.base.AbstractSubscriber;
+import measurement.client.base.Payload;
+import measurement.client.base.Record;
 
 public class NatsSubscriber extends AbstractSubscriber {
     private Connection nc;
@@ -48,23 +49,23 @@ public class NatsSubscriber extends AbstractSubscriber {
     }
 
     @Override
-    public List<Payload> subscribe() {
+    public List<Record> subscribe() {
         ObjectMapper mapper = new ObjectMapper();
-        List<Payload> payloads = new ArrayList<>();
+        List<Record> records = new ArrayList<>();
         List<Message> messages = sub.fetch(batchSize, maxWait);
         for (Message msg : messages) {
             try {
                 String json = new String(msg.getData());
                 Payload payload = mapper.readValue(json, Payload.class);
-                payload.receivedTime = Instant.now().toEpochMilli();
-                payload.size = json.length();
-                payloads.add(payload);
+                long receivedTime = Instant.now().toEpochMilli();
+                records.add(new Record(payload, receivedTime, json.length()));
             } catch (Exception e) {
                 Measurement.logger.warning("Error receiving message.\n" + e.getMessage());
+                this.isTerminated = true;
             }
             msg.ack();
         }
-        return payloads;
+        return records;
     }
 
     @Override

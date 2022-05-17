@@ -1,4 +1,4 @@
-package measurement.client;
+package measurement.client.base;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -8,6 +8,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.RandomStringUtils;
+
+import measurement.client.Measurement;
 
 public abstract class AbstractPublisher extends AbstractClient implements Runnable {
     protected long interval;
@@ -54,23 +56,23 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
         }
     }
 
-    private void recordThrouput(Payload payload){
-        throuputMap.merge(payload.sentTime, 1L, Long::sum);
+    private void recordThrouput(Record record){
+        throuputMap.merge(record.getSentTime()/1000, 1L, Long::sum);
     }
 
     // スレッドはループしてPublishを続ける
     public void continuingPublish() {
         while (!isTerminated) {
-            Payload payload =  publish();
-            recordThrouput(payload);
+            Record record =  publish();
+            recordThrouput(record);
         }
     }
 
     // スレッドは1回Publishして終了する
     public void intervalPublish() {
         if (!isTerminated) {
-            Payload payload = publish();
-            recordThrouput(payload);
+            Record record = publish();
+            recordThrouput(record);
         }
     }
 
@@ -100,5 +102,5 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
         }
     }
 
-    public abstract Payload publish();
+    public abstract Record publish();
 }

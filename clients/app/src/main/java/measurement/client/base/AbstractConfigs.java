@@ -1,4 +1,4 @@
-package measurement.client;
+package measurement.client.base;
 
 public class AbstractConfigs {
         

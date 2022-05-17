@@ -1,4 +1,4 @@
-package measurement.client;
+package measurement.client.base;
 
 public abstract class AbstractClient {
     protected String clientId;

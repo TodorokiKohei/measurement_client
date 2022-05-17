@@ -1,4 +1,4 @@
-package measurement.client;
+package measurement.client.base;
 
 import java.util.List;
 import java.util.Iterator;
@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import measurement.client.Measurement;
 
 public abstract class AbstractSubscriber extends AbstractClient implements Runnable{
     protected Map<Long, Long> throuputMap;
@@ -28,9 +30,9 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
         future = service.schedule(this, 0, TimeUnit.MILLISECONDS);
     }
 
-    private void recordThrouput(List<Payload> payloads){
-        for(Payload payload: payloads){
-            throuputMap.merge(payload.receivedTime, 1L, Long::sum);
+    private void recordThrouput(List<Record> records){
+        for(Record record: records){
+            throuputMap.merge(record.getReceivedTime()/1000, 1L, Long::sum);
         }
     }
 
@@ -39,8 +41,8 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
         // terminateが呼ばれるまでSubscribe処理
         Measurement.logger.info("Start subscribe.");
         while(!isTerminated){
-            List<Payload> payloads= subscribe();
-            recordThrouput(payloads);
+            List<Record> records = subscribe();
+            recordThrouput(records);
         }
     }
 
@@ -72,5 +74,5 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
         }
     }
 
-    public abstract List<Payload> subscribe();
+    public abstract List<Record> subscribe();
 }

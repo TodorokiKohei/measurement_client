@@ -1,8 +1,9 @@
 package measurement.client.nats;
 
-import measurement.client.AbstractPublisher;
 import measurement.client.Measurement;
-import measurement.client.Payload;
+import measurement.client.base.AbstractPublisher;
+import measurement.client.base.Payload;
+import measurement.client.base.Record;
 
 import java.time.Instant;
 
@@ -45,18 +46,21 @@ public class NatsPublisher extends AbstractPublisher {
     }
 
     @Override
-    public Payload publish() {
+    public Record publish() {
         // ペイロード作成
         Payload payload = new Payload(clientId, ++lastMessageNum, Instant.now().toEpochMilli(), createMessage());
+        Record record = null;
         try {
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(payload);
             js.publish(subject, json.getBytes(), pubOptions);
+            record = new Record(payload, json.length());
         } catch (Exception e) {
             Measurement.logger.warning("Error sending message.\n" + e.getMessage());
+            this.isTerminated = true;
         }
         // 処理したメッセージ数を返す
-        return payload;
+        return record;
     }
 
     @Override

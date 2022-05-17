@@ -9,14 +9,14 @@ import java.util.concurrent.TimeUnit;
 
 import org.yaml.snakeyaml.Yaml;
 
-import measurement.client.Driver;
 import measurement.client.Measurement;
-import measurement.client.Recorder;
-import measurement.client.Utils;
-import measurement.client.AbstractPublisher;
-import measurement.client.AbstractSubscriber;
+import measurement.client.base.AbstractPublisher;
+import measurement.client.base.AbstractSubscriber;
+import measurement.client.base.AbstractDriver;
+import measurement.client.base.Recorder;
+import measurement.client.base.Utils;
 
-public class NatsDriver extends Driver {
+public class NatsDriver extends AbstractDriver {
 
     private static final String resourceName = "/natsconf.yaml";
 
@@ -31,7 +31,7 @@ public class NatsDriver extends Driver {
         try {
             if (fileName == null) {
                 // 指定がなければクラスパス内のデフォルトファイルを読み込み
-                is = Driver.class.getResourceAsStream(resourceName);
+                is = AbstractDriver.class.getResourceAsStream(resourceName);
                 Measurement.logger.info("Load resource file.(" + resourceName + ")");
                 if (is == null)
                     throw new FileNotFoundException();
@@ -55,9 +55,6 @@ public class NatsDriver extends Driver {
                 is.close();
             }
         } catch (Exception e) {}
-
-        recorder = new Recorder();
-        
     }
 
     @Override
@@ -100,7 +97,7 @@ public class NatsDriver extends Driver {
 
     @Override
     public void startMeasurement() {
-        recorder.start();
+        // recorder.start();
         for (AbstractSubscriber sub : subscriber) {
             sub.start();
         }
@@ -136,7 +133,7 @@ public class NatsDriver extends Driver {
         for (AbstractSubscriber sub : subscriber) {
             sub.close();
         }
-        recorder.terminate();
+        // recorder.terminate();
     }
 
     @Override

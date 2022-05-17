@@ -1,6 +1,6 @@
-package measurement.client;
+package measurement.client.base;
 
-public abstract class Driver {
+public abstract class AbstractDriver {
     public abstract void setupClients();
     public abstract void startMeasurement();
     public abstract void waitForMeasurement();
