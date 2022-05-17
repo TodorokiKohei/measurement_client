@@ -11,6 +11,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import measurement.client.Driver;
 import measurement.client.Measurement;
+import measurement.client.Recorder;
 import measurement.client.Utils;
 import measurement.client.AbstractPublisher;
 import measurement.client.AbstractSubscriber;
@@ -19,6 +20,7 @@ public class NatsDriver extends Driver {
 
     private static final String resourceName = "/natsconf.yaml";
 
+    private Recorder recorder;
     private NatsConfigs natsConfigs;
     private List<AbstractPublisher> publisher = new ArrayList<>();
     private List<AbstractSubscriber> subscriber = new ArrayList<>();
@@ -53,6 +55,9 @@ public class NatsDriver extends Driver {
                 is.close();
             }
         } catch (Exception e) {}
+
+        recorder = new Recorder();
+        
     }
 
     @Override
@@ -95,6 +100,7 @@ public class NatsDriver extends Driver {
 
     @Override
     public void startMeasurement() {
+        recorder.start();
         for (AbstractSubscriber sub : subscriber) {
             sub.start();
         }
@@ -130,6 +136,7 @@ public class NatsDriver extends Driver {
         for (AbstractSubscriber sub : subscriber) {
             sub.close();
         }
+        recorder.terminate();
     }
 
     @Override

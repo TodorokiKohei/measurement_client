@@ -2,6 +2,7 @@ package measurement.client;
 
 import java.util.StringJoiner;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 public class Payload {
@@ -10,11 +11,15 @@ public class Payload {
     public Long sentTime;
     public String data;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnore
     public Long receivedTime;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnore
     public Integer size;
-
+    @JsonIgnore
+    public Boolean isLast = false;
+    @JsonIgnore
+    public Boolean isLast = false;
+    
     public Payload() {
     }
 
@@ -29,15 +34,22 @@ public class Payload {
         this(sentClientId, seqNum, sentTime, "");
     }
 
+    // レコードのフォーマット形式に変換
     public String toRecordFormat() {
         String values[] = { sentClientId, seqNum.toString(), sentTime.toString(), receivedTime.toString() };
         StringJoiner sj = new StringJoiner(",");
         for(String val: values){
-            sj.add(val);
+            if (val == null) {
+                sj.add("");
+            }else{
+                sj.add(val);
+            }
+            
         }
         return sj.toString();
     }
 
+    // レコードのフォーマット形式のヘッダーを作成
     public String toRecordFormatHeader() {
         String headers[] = { "sentClientId", "seqNum", "sentTime", "receivedTime" };
         StringJoiner sj = new StringJoiner(",");
@@ -47,15 +59,10 @@ public class Payload {
         return sj.toString();
     }
 
+    // 受信 - 発信 でレイテンシーを計算
     public long calcLatency() {
         if (receivedTime == null)
             return 0;
         return receivedTime - sentTime;
-    }
-
-    public long getSize(){
-        if (size == null)
-            return 0;
-        return size;
     }
 }

@@ -12,7 +12,6 @@ import io.nats.client.Connection;
 import io.nats.client.Nats;
 import io.nats.client.PublishOptions;
 import io.nats.client.PublishOptions.Builder;
-import io.nats.client.api.PublishAck;
 import io.nats.client.JetStream;
 
 public class NatsPublisher extends AbstractPublisher {
@@ -52,7 +51,7 @@ public class NatsPublisher extends AbstractPublisher {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(payload);
-            PublishAck pa = js.publish(subject, json.getBytes(), pubOptions);
+            js.publish(subject, json.getBytes(), pubOptions);
         } catch (Exception e) {
             Measurement.logger.warning("Error sending message.\n" + e.getMessage());
         }
