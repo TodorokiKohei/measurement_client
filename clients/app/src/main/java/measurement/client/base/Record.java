@@ -9,34 +9,30 @@ public class Record {
     private Long receivedTime;
     private Integer size;
     private Boolean isLast;
+    private String clientId;
 
-    protected Record(String sentClientId, Integer seqNum, Long sentTime, Long receivedTime, Integer size, boolean isLast) {
+    protected Record(String sentClientId, Integer seqNum, Long sentTime, Long receivedTime, Integer size, boolean isLast, String clientId) {
         this.sentClientId = sentClientId;
         this.seqNum = seqNum;
         this.sentTime = sentTime;
         this.receivedTime = receivedTime;
         this.size = size;
         this.isLast = isLast;
+        this.clientId = clientId;
     }
+
+    public Record(){}
 
     public Record(Boolean isLast) {
         this.isLast = isLast;
     }
 
-    // public Record(String sentClientId, Integer seqNum, Long sentTime, Integer size) {
-    //     this(sentClientId, seqNum, sentTime, 0L, size, false);
-    // }
-
-    // public Record(String sentClientId, Integer seqNum, Long sentTime, Long receivedTime, Integer size) {
-    //     this(sentClientId, seqNum, sentTime, receivedTime, size, false);
-    // }
-
-    public Record(Payload payload, Integer size) {
-        this(payload.sentClientId, payload.seqNum, payload.sentTime, 0L, size, false);
+    public Record(Payload payload, Integer size, String clientId) {
+        this(payload.sentClientId, payload.seqNum, payload.sentTime, 0L, size, false, clientId);
     }
 
-    public Record(Payload payload, Long receivedTime, Integer size) {
-        this(payload.sentClientId, payload.seqNum, payload.sentTime, receivedTime, size, false);
+    public Record(Payload payload, Long receivedTime, Integer size, String clientId) {
+        this(payload.sentClientId, payload.seqNum, payload.sentTime, receivedTime, size, false, clientId);
     }
 
     public String getSentClientId() {
@@ -63,6 +59,9 @@ public class Record {
         return isLast;
     }
 
+    public String getClientId(){
+        return clientId;
+    }
     // レコードのフォーマット形式に変換
     public String toRecordFormat() {
         String values[] = { sentClientId, seqNum.toString(), sentTime.toString(), receivedTime.toString() };

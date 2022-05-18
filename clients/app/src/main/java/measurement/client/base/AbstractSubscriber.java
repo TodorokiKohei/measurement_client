@@ -1,5 +1,10 @@
 package measurement.client.base;
 
+import java.io.BufferedWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Iterator;
 import java.util.Map;
@@ -11,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import measurement.client.Measurement;
 
-public abstract class AbstractSubscriber extends AbstractClient implements Runnable{
+public abstract class AbstractSubscriber extends AbstractClient implements Runnable {
     protected Map<Long, Long> throuputMap;
     protected volatile boolean isTerminated;
 
@@ -26,23 +31,29 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
 
     public void start() {
         // 別スレッドでSubscribe処理を開始
+        Measurement.logger.info("Start " + clientId + ".");
         service = Executors.newSingleThreadScheduledExecutor();
         future = service.schedule(this, 0, TimeUnit.MILLISECONDS);
     }
 
-    private void recordThrouput(List<Record> records){
-        for(Record record: records){
-            throuputMap.merge(record.getReceivedTime()/1000, 1L, Long::sum);
+    public void setRecorder(Recorder recorder) {
+        this.recorder = recorder;
+    }
+
+    private void recordThrouput(List<Record> records) {
+        for (Record record : records) {
+            throuputMap.merge(record.getReceivedTime() / 1000, 1L, Long::sum);
         }
     }
 
     @Override
-    public void run(){
+    public void run() {
         // terminateが呼ばれるまでSubscribe処理
         Measurement.logger.info("Start subscribe.");
-        while(!isTerminated){
+        while (!isTerminated) {
             List<Record> records = subscribe();
             recordThrouput(records);
+            recorder.add(records);
         }
     }
 
@@ -65,14 +76,36 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
         }
     }
 
-    public void printThrouput(){
-        Measurement.logger.info(clientId + "'s throuput results.");
+    public void recordThrouput(String outputDir){
+        Path path = Path.of(outputDir, clientId + "-throuput.csv");
+        BufferedWriter bw = null;
+        try {
+            bw = Files.newBufferedWriter(path, Charset.forName("UTF-8"), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            bw.append("time,total_msg_count");
+            bw.newLine();    
+        } catch (Exception e) {
+            Measurement.logger.warning("Failed to write results of throuput.(" + clientId + ")");
+            return;
+        }
+        
         Iterator<Map.Entry<Long, Long>> itr = throuputMap.entrySet().iterator();
         while(itr.hasNext()){
             Map.Entry<Long, Long> entry = itr.next();
-            Measurement.logger.info("(" + clientId + ") " + entry.getKey() + ":" + entry.getValue());
+            try {
+                bw.append(entry.getKey() + "," + entry.getValue());
+                bw.newLine();
+            } catch (Exception e) {
+                Measurement.logger.warning("Failed to write results of throuput.(" + clientId + ")");
+                return;
+            }
+        }
+
+        try {
+            bw.flush();
+            bw.close();
+        } catch (Exception e) {
+            //TODO: handle exception
         }
     }
-
     public abstract List<Record> subscribe();
 }

@@ -11,6 +11,10 @@ public abstract class AbstractClient {
     public String getClientId() {
         return clientId;
     }
+
+    public void setRecorder(Recorder recorder){
+        this.recorder = recorder;
+    }
     
     public abstract void close();
 }

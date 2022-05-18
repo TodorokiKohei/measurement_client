@@ -15,6 +15,7 @@ import measurement.client.nats.NatsDriver;
 
 public class Measurement {
 
+    private static final String defaultOutputDir = "results";
     private CommandLine cmd = null;
     public static final Logger logger = Logger.getLogger(Measurement.class.getName());
 
@@ -38,6 +39,12 @@ public class Measurement {
             .argName("driver")
             .hasArg()
             .required()
+            .build()
+        );
+        options.addOption(Option.builder("o")
+            .longOpt("output")
+            .argName("output")
+            .hasArg()
             .build()
         );
         try {
@@ -76,6 +83,7 @@ public class Measurement {
 
         logger.info("Prepare connected clients.");
         driver.setupClients();
+        driver.setupRecoder(cmd.getOptionValue("output", defaultOutputDir));
 
         logger.info("Start measurement.");
         driver.startMeasurement();
@@ -89,7 +97,7 @@ public class Measurement {
         driver.treadownClients();
 
         logger.info("Print client result.");
-        driver.printResult();
+        driver.recordResults(cmd.getOptionValue("output", defaultOutputDir));
     }
 
     public static void main(String[] args) {

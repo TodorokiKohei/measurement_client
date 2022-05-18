@@ -12,6 +12,7 @@ import org.yaml.snakeyaml.Yaml;
 import measurement.client.Measurement;
 import measurement.client.base.AbstractPublisher;
 import measurement.client.base.AbstractSubscriber;
+import measurement.client.base.AbstractClient;
 import measurement.client.base.AbstractDriver;
 import measurement.client.base.Recorder;
 import measurement.client.base.Utils;
@@ -54,7 +55,8 @@ public class NatsDriver extends AbstractDriver {
             if (is != null) {
                 is.close();
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 
     @Override
@@ -63,13 +65,12 @@ public class NatsDriver extends AbstractDriver {
         if (npc != null) {
             // Publishのメッセージ間隔をμsec単位で計算
             long interval = Utils.calcMicroSecInterval(npc.getMessageRate(), npc.getMessageSize());
-
             // Publisherの作成
             for (int i = 0; i < natsConfigs.getPubConf().getNumber(); i++) {
                 publisher.add(new NatsPublisher(
                         "publisher-" + i,
                         interval,
-                        (int)Utils.byteStringToDouble(npc.getMessageSize()),
+                        (int) Utils.byteStringToDouble(npc.getMessageSize()),
                         npc.getServer(),
                         npc.getStream(),
                         npc.getSubject()));
@@ -78,7 +79,6 @@ public class NatsDriver extends AbstractDriver {
 
         NatsSubConfig nsc = natsConfigs.getSubConf();
         if (nsc != null) {
-
             // Subscriberの作成
             for (int i = 0; i < natsConfigs.getSubConf().getNumber(); i++) {
                 subscriber.add(new NatsSubscriber(
@@ -96,8 +96,20 @@ public class NatsDriver extends AbstractDriver {
     }
 
     @Override
+    public void setupRecoder(String outputDir) {
+        this.recorder = new Recorder(outputDir);
+        for (AbstractClient client: publisher){
+            client.setRecorder(recorder);
+        }
+        for (AbstractClient client: subscriber){
+            client.setRecorder(recorder);
+            recorder.createOutputFile(client.getClientId());
+        }
+    }
+
+    @Override
     public void startMeasurement() {
-        // recorder.start();
+        recorder.start();
         for (AbstractSubscriber sub : subscriber) {
             sub.start();
         }
@@ -123,6 +135,7 @@ public class NatsDriver extends AbstractDriver {
         for (AbstractSubscriber sub : subscriber) {
             sub.terminate();
         }
+        recorder.terminate();
     }
 
     @Override
@@ -133,16 +146,16 @@ public class NatsDriver extends AbstractDriver {
         for (AbstractSubscriber sub : subscriber) {
             sub.close();
         }
-        // recorder.terminate();
+        recorder.close();
     }
 
     @Override
-    public void printResult(){
+    public void recordResults(String outputDir) {
         for (AbstractPublisher pub : publisher) {
-            pub.printThrouput();
+            pub.recordThrouput(outputDir);
         }
         for (AbstractSubscriber sub : subscriber) {
-            sub.printThrouput();
+            sub.recordThrouput(outputDir);
         }
     }
 }

@@ -54,7 +54,7 @@ public class NatsPublisher extends AbstractPublisher {
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(payload);
             js.publish(subject, json.getBytes(), pubOptions);
-            record = new Record(payload, json.length());
+            record = new Record(payload, json.length(), clientId);
         } catch (Exception e) {
             Measurement.logger.warning("Error sending message.\n" + e.getMessage());
             this.isTerminated = true;

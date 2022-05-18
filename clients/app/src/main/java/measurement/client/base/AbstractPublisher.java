@@ -1,5 +1,10 @@
 package measurement.client.base;
 
+import java.io.BufferedWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -7,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.RandomStringUtils;
 
 import measurement.client.Measurement;
@@ -93,14 +99,36 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
         }
     }
 
-    public void printThrouput(){
-        Measurement.logger.info(clientId + "'s throuput results.");
+    public void recordThrouput(String outputDir){
+        Path path = Path.of(outputDir, clientId + "-throuput.csv");
+        BufferedWriter bw = null;
+        try {
+            bw = Files.newBufferedWriter(path, Charset.forName("UTF-8"), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            bw.append("time,total_msg_count");
+            bw.newLine();    
+        } catch (Exception e) {
+            Measurement.logger.warning("Failed to write results of throuput.(" + clientId + ")");
+            return;
+        }
+        
         Iterator<Map.Entry<Long, Long>> itr = throuputMap.entrySet().iterator();
         while(itr.hasNext()){
             Map.Entry<Long, Long> entry = itr.next();
-            Measurement.logger.info("(" + clientId + ") " + entry.getKey() + ":" + entry.getValue());
+            try {
+                bw.append(entry.getKey() + "," + entry.getValue());
+                bw.newLine();
+            } catch (Exception e) {
+                Measurement.logger.warning("Failed to write results of throuput.(" + clientId + ")");
+                return;
+            }
+        }
+
+        try {
+            bw.flush();
+            bw.close();
+        } catch (Exception e) {
+            //TODO: handle exception
         }
     }
-
     public abstract Record publish();
 }

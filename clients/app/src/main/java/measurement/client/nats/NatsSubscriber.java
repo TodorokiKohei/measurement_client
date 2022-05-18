@@ -58,7 +58,7 @@ public class NatsSubscriber extends AbstractSubscriber {
                 String json = new String(msg.getData());
                 Payload payload = mapper.readValue(json, Payload.class);
                 long receivedTime = Instant.now().toEpochMilli();
-                records.add(new Record(payload, receivedTime, json.length()));
+                records.add(new Record(payload, receivedTime, json.length(), clientId));
             } catch (Exception e) {
                 Measurement.logger.warning("Error receiving message.\n" + e.getMessage());
                 this.isTerminated = true;
