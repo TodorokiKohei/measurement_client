@@ -1,4 +1,4 @@
-package measurement.client.nats;
+package measurement.client.jetstream;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import measurement.client.base.AbstractSubscriber;
 import measurement.client.base.Payload;
 import measurement.client.base.Record;
 
-public class NatsSubscriber extends AbstractSubscriber {
+public class JetStreamSubscriber extends AbstractSubscriber {
     private Connection nc;
     private JetStream js;
     private JetStreamSubscription sub;
@@ -26,8 +26,8 @@ public class NatsSubscriber extends AbstractSubscriber {
     private int batchSize;
     private long maxWait;
 
-    public NatsSubscriber(String clientId, String server, String stream, String subject,
-            String durable, int batchSize, long maxWait, NatsSubMode mode, String queueGroup) {
+    public JetStreamSubscriber(String clientId, String server, String stream, String subject,
+            String durable, int batchSize, long maxWait, JetStreamSubMode mode, String queueGroup) {
         super(clientId);
 
         Builder builder = PullSubscribeOptions.builder();

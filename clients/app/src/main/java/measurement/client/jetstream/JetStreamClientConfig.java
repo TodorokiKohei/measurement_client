@@ -1,6 +1,6 @@
-package measurement.client.nats;
+package measurement.client.jetstream;
 
-public abstract class NatsClientConfig {
+public abstract class JetStreamClientConfig {
     private String server;
     private String stream;
     private String subject;

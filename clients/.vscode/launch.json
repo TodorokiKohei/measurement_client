@@ -16,7 +16,7 @@
             "request": "launch",
             "mainClass": "measurement.client.Measurement",
             "projectName": "app",
-            "args": "-d nats"
+            "args": "-d jetstream"
         }
     ]
 }

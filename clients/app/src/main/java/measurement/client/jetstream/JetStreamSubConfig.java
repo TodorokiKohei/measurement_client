@@ -1,10 +1,10 @@
-package measurement.client.nats;
+package measurement.client.jetstream;
 
-public class NatsSubConfig extends NatsClientConfig {
+public class JetStreamSubConfig extends JetStreamClientConfig {
     private String durable;
     private int batchSize;
     private long maxWait;    
-    private NatsSubMode mode;
+    private JetStreamSubMode mode;
     private String queueGroup;
 
     public String getDurable() {
@@ -19,7 +19,7 @@ public class NatsSubConfig extends NatsClientConfig {
         return maxWait;
     }
 
-    public NatsSubMode getMode() {
+    public JetStreamSubMode getMode() {
         return mode;
     }
 
@@ -39,7 +39,7 @@ public class NatsSubConfig extends NatsClientConfig {
         this.maxWait = maxWait;
     }
 
-    public void setMode(NatsSubMode mode) {
+    public void setMode(JetStreamSubMode mode) {
         this.mode = mode;
     }
 

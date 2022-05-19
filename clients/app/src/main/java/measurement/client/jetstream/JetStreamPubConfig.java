@@ -1,6 +1,6 @@
-package measurement.client.nats;
+package measurement.client.jetstream;
 
-public class NatsPubConfig extends NatsClientConfig {
+public class JetStreamPubConfig extends JetStreamClientConfig {
     private String messageRate = "0";
     private String messageSize;
 

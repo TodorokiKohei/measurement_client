@@ -1,4 +1,4 @@
-package measurement.client.nats;
+package measurement.client.jetstream;
 
 import measurement.client.Measurement;
 import measurement.client.base.AbstractPublisher;
@@ -15,7 +15,7 @@ import io.nats.client.PublishOptions;
 import io.nats.client.PublishOptions.Builder;
 import io.nats.client.JetStream;
 
-public class NatsPublisher extends AbstractPublisher {
+public class JetStreamPublisher extends AbstractPublisher {
 
     private Connection nc;
     private JetStream js;
@@ -24,7 +24,7 @@ public class NatsPublisher extends AbstractPublisher {
     private String subject;
     private int lastMessageNum;
 
-    public NatsPublisher(String clientId, long interval, int messageSize, String server, String stream,
+    public JetStreamPublisher(String clientId, long interval, int messageSize, String server, String stream,
             String subject) {
         super(clientId, interval, messageSize);
 

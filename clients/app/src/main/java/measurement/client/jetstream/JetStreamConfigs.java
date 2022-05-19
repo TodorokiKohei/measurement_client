@@ -1,12 +1,12 @@
-package measurement.client.nats;
+package measurement.client.jetstream;
 
-public class NatsConfigs {
+public class JetStreamConfigs {
     private long execTime;
     private Boolean recordMessage = false;
     private long publisherRiseTime = 0;
     private long subscriberFallTime = 0;
-    private NatsPubConfig pubConf;
-    private NatsSubConfig subConf;
+    private JetStreamPubConfig pubConf;
+    private JetStreamSubConfig subConf;
 
     public long getExecTime() {
         return execTime;
@@ -16,11 +16,11 @@ public class NatsConfigs {
         return recordMessage;
     }
 
-    public NatsPubConfig getPubConf() {
+    public JetStreamPubConfig getPubConf() {
         return pubConf;
     }
 
-    public NatsSubConfig getSubConf() {
+    public JetStreamSubConfig getSubConf() {
         return subConf;
     }
 
@@ -32,11 +32,11 @@ public class NatsConfigs {
         this.recordMessage = recordMessage;
     }
 
-    public void setPubConf(NatsPubConfig pubConf) {
+    public void setPubConf(JetStreamPubConfig pubConf) {
         this.pubConf = pubConf;
     }
 
-    public void setSubConf(NatsSubConfig subConf) {
+    public void setSubConf(JetStreamSubConfig subConf) {
         this.subConf = subConf;
     }
 }

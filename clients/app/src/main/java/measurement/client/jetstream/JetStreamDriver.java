@@ -1,4 +1,4 @@
-package measurement.client.nats;
+package measurement.client.jetstream;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,16 +17,16 @@ import measurement.client.base.AbstractDriver;
 import measurement.client.base.Recorder;
 import measurement.client.base.Utils;
 
-public class NatsDriver extends AbstractDriver {
+public class JetStreamDriver extends AbstractDriver {
 
     private static final String resourceName = "/natsconf.yaml";
 
     private Recorder recorder;
-    private NatsConfigs natsConfigs;
+    private JetStreamConfigs natsConfigs;
     private List<AbstractPublisher> publisher = new ArrayList<>();
     private List<AbstractSubscriber> subscriber = new ArrayList<>();
 
-    public NatsDriver(String fileName) {
+    public JetStreamDriver(String fileName) {
         // yaml形式の設定ファイルを読み込み
         InputStream is = null;
         try {
@@ -50,7 +50,7 @@ public class NatsDriver extends AbstractDriver {
             System.exit(1);
         }
         Yaml yaml = new Yaml();
-        natsConfigs = yaml.loadAs(is, NatsConfigs.class);
+        natsConfigs = yaml.loadAs(is, JetStreamConfigs.class);
         try {
             if (is != null) {
                 is.close();
@@ -61,13 +61,13 @@ public class NatsDriver extends AbstractDriver {
 
     @Override
     public void setupClients() {
-        NatsPubConfig npc = natsConfigs.getPubConf();
+        JetStreamPubConfig npc = natsConfigs.getPubConf();
         if (npc != null) {
             // Publishのメッセージ間隔をμsec単位で計算
             long interval = Utils.calcMicroSecInterval(npc.getMessageRate(), npc.getMessageSize());
             // Publisherの作成
             for (int i = 0; i < natsConfigs.getPubConf().getNumber(); i++) {
-                publisher.add(new NatsPublisher(
+                publisher.add(new JetStreamPublisher(
                         "publisher-" + i,
                         interval,
                         (int) Utils.byteStringToDouble(npc.getMessageSize()),
@@ -77,11 +77,11 @@ public class NatsDriver extends AbstractDriver {
             }
         }
 
-        NatsSubConfig nsc = natsConfigs.getSubConf();
+        JetStreamSubConfig nsc = natsConfigs.getSubConf();
         if (nsc != null) {
             // Subscriberの作成
             for (int i = 0; i < natsConfigs.getSubConf().getNumber(); i++) {
-                subscriber.add(new NatsSubscriber(
+                subscriber.add(new JetStreamSubscriber(
                         "subscriber-" + i,
                         nsc.getServer(),
                         nsc.getStream(),

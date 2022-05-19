@@ -11,7 +11,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import measurement.client.base.AbstractDriver;
-import measurement.client.nats.NatsDriver;
+import measurement.client.jetstream.JetStreamDriver;
 
 public class Measurement {
 
@@ -74,8 +74,8 @@ public class Measurement {
 
         // Driver(計測を実行する処理が記述されたクラス)を引数を元に作成
         AbstractDriver driver = null;
-        if (cmd.getOptionValue("d").equals("nats")){
-            driver = new NatsDriver(cmd.getOptionValue("config"));
+        if (cmd.getOptionValue("d").equals("jetstream")){
+            driver = new JetStreamDriver(cmd.getOptionValue("config"));
         }else{
             logger.warning("The -d or --driver setting is not valid.");
             System.exit(1);
