@@ -1,6 +1,6 @@
 package measurement.client.jetstream;
 
-public class JetStreamPubConfig extends JetStreamClientConfig {
+public class JetStreamPubConfigs extends JetStreamClientConfig {
     private String messageRate = "0";
     private String messageSize;
 

@@ -3,30 +3,21 @@ package measurement.client.jetstream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.yaml.snakeyaml.Yaml;
 
 import measurement.client.Measurement;
-import measurement.client.base.AbstractPublisher;
-import measurement.client.base.AbstractSubscriber;
-import measurement.client.base.AbstractClient;
+import measurement.client.base.AbstractConfigs;
 import measurement.client.base.AbstractDriver;
-import measurement.client.base.Recorder;
 import measurement.client.base.Utils;
 
 public class JetStreamDriver extends AbstractDriver {
 
-    private static final String resourceName = "/natsconf.yaml";
+    private static final String resourceName = "/jetstreamconf.yaml";
 
-    private Recorder recorder;
-    private JetStreamConfigs natsConfigs;
-    private List<AbstractPublisher> publisher = new ArrayList<>();
-    private List<AbstractSubscriber> subscriber = new ArrayList<>();
+    private JetStreamConfigs jetStreamConfigs;
 
-    public JetStreamDriver(String fileName) {
+    public AbstractConfigs loadConfigs(String fileName) {
         // yaml形式の設定ファイルを読み込み
         InputStream is = null;
         try {
@@ -50,112 +41,60 @@ public class JetStreamDriver extends AbstractDriver {
             System.exit(1);
         }
         Yaml yaml = new Yaml();
-        natsConfigs = yaml.loadAs(is, JetStreamConfigs.class);
+        jetStreamConfigs = yaml.loadAs(is, JetStreamConfigs.class);
         try {
             if (is != null) {
                 is.close();
             }
         } catch (Exception e) {
         }
+        return jetStreamConfigs;
     }
 
     @Override
     public void setupClients() {
-        JetStreamPubConfig npc = natsConfigs.getPubConf();
-        if (npc != null) {
+        JetStreamPubConfigs jspc = jetStreamConfigs.getPubConf();
+        if (jspc != null) {
             // Publishのメッセージ間隔をμsec単位で計算
-            long interval = Utils.calcMicroSecInterval(npc.getMessageRate(), npc.getMessageSize());
+            long interval = Utils.calcMicroSecInterval(jspc.getMessageRate(), jspc.getMessageSize());
             // Publisherの作成
-            for (int i = 0; i < natsConfigs.getPubConf().getNumber(); i++) {
+            for (int i = 0; i < jetStreamConfigs.getPubConf().getNumber(); i++) {
                 publisher.add(new JetStreamPublisher(
                         "publisher-" + i,
                         interval,
-                        (int) Utils.byteStringToDouble(npc.getMessageSize()),
-                        npc.getServer(),
-                        npc.getStream(),
-                        npc.getSubject()));
+                        (int) Utils.byteStringToDouble(jspc.getMessageSize()),
+                        jspc.getServer(),
+                        jspc.getStream(),
+                        jspc.getSubject()));
             }
         }
 
-        JetStreamSubConfig nsc = natsConfigs.getSubConf();
-        if (nsc != null) {
+        JetStreamSubConfigs jssc = jetStreamConfigs.getSubConf();
+        if (jssc != null) {
             // Subscriberの作成
-            for (int i = 0; i < natsConfigs.getSubConf().getNumber(); i++) {
-                subscriber.add(new JetStreamSubscriber(
-                        "subscriber-" + i,
-                        nsc.getServer(),
-                        nsc.getStream(),
-                        nsc.getSubject(),
-                        nsc.getDurable(),
-                        nsc.getBatchSize(),
-                        nsc.getMaxWait(),
-                        nsc.getMode(),
-                        nsc.getQueueGroup()));
+            for (int i = 0; i < jetStreamConfigs.getSubConf().getNumber(); i++) {
+                if (jssc.getMode() == JetStreamSubMode.pull) {
+                    Measurement.logger.info("Create subscriber in mode of pull");
+                    subscriber.add(new JetStreamPullSubscriber(
+                            "subscriber-pull-" + i,
+                            jssc.getServer(),
+                            jssc.getStream(),
+                            jssc.getSubject(),
+                            jssc.getDurable(),
+                            jssc.getBatchSize(),
+                            jssc.getMaxWait()));
+                } else if (jssc.getMode() == JetStreamSubMode.push) {
+                    Measurement.logger.info("Create subscriber in mode of push");
+                    subscriber.add(new JetStreamPushSubscriber(
+                            "subscriber-push-" + i,
+                            jssc.getServer(),
+                            jssc.getStream(),
+                            jssc.getSubject(),
+                            jssc.getDurable(),
+                            jssc.getMaxWait(),
+                            jssc.getQueueGroup()));
+                }
             }
-        }
-    }
-
-    @Override
-    public void setupRecoder(String outputDir) {
-        this.recorder = new Recorder(outputDir);
-        for (AbstractClient client: publisher){
-            client.setRecorder(recorder);
-        }
-        for (AbstractClient client: subscriber){
-            client.setRecorder(recorder);
-            recorder.createOutputFile(client.getClientId());
-        }
-    }
-
-    @Override
-    public void startMeasurement() {
-        recorder.start();
-        for (AbstractSubscriber sub : subscriber) {
-            sub.start();
-        }
-        for (AbstractPublisher pub : publisher) {
-            pub.start();
-        }
-    }
-
-    @Override
-    public void waitForMeasurement() {
-        try {
-            TimeUnit.SECONDS.sleep(natsConfigs.getExecTime());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void stopMeasurement() {
-        for (AbstractPublisher pub : publisher) {
-            pub.terminate();
-        }
-        for (AbstractSubscriber sub : subscriber) {
-            sub.terminate();
-        }
-        recorder.terminate();
-    }
-
-    @Override
-    public void treadownClients() {
-        for (AbstractPublisher pub : publisher) {
-            pub.close();
-        }
-        for (AbstractSubscriber sub : subscriber) {
-            sub.close();
-        }
-        recorder.close();
-    }
-
-    @Override
-    public void recordResults(String outputDir) {
-        for (AbstractPublisher pub : publisher) {
-            pub.recordThrouput(outputDir);
-        }
-        for (AbstractSubscriber sub : subscriber) {
-            sub.recordThrouput(outputDir);
         }
     }
 }

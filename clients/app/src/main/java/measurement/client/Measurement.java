@@ -1,5 +1,8 @@
 package measurement.client;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,33 +23,29 @@ public class Measurement {
     public static final Logger logger = Logger.getLogger(Measurement.class.getName());
 
     // 引数の解析処理を実行
-    private void parseArgs(String[] args){
+    private void parseArgs(String[] args) {
         Options options = new Options();
         options.addOption(Option.builder("c")
-            .longOpt("config")
-            .argName("config")
-            .hasArg()
-            .build()
-        );
+                .longOpt("config")
+                .argName("config")
+                .hasArg()
+                .build());
         options.addOption(Option.builder("l")
-            .longOpt("log-level")
-            .argName("log-level")
-            .hasArg()
-            .build()
-        );
+                .longOpt("log-level")
+                .argName("log-level")
+                .hasArg()
+                .build());
         options.addOption(Option.builder("d")
-            .longOpt("driver")
-            .argName("driver")
-            .hasArg()
-            .required()
-            .build()
-        );
+                .longOpt("driver")
+                .argName("driver")
+                .hasArg()
+                .required()
+                .build());
         options.addOption(Option.builder("o")
-            .longOpt("output")
-            .argName("output")
-            .hasArg()
-            .build()
-        );
+                .longOpt("output")
+                .argName("output")
+                .hasArg()
+                .build());
         try {
             CommandLineParser parser = new DefaultParser();
             cmd = parser.parse(options, args);
@@ -58,28 +57,28 @@ public class Measurement {
     }
 
     // loggerの初期設定
-    private void initLogger(){
+    private void initLogger() {
         // levelの設定（デフォルトではINFO）
-        if (cmd.getOptionValue("log-level") == null){
+        if (cmd.getOptionValue("log-level") == null) {
             logger.setLevel(Level.INFO);
-        }else{
+        } else {
             logger.setLevel(Level.parse(cmd.getOptionValue("log-level")));
         }
     }
 
-    public Measurement(String[] args){
+    public Measurement(String[] args) {
         parseArgs(args);
         initLogger();
-        logger.info("Initialization is completed.");
 
         // Driver(計測を実行する処理が記述されたクラス)を引数を元に作成
         AbstractDriver driver = null;
-        if (cmd.getOptionValue("d").equals("jetstream")){
-            driver = new JetStreamDriver(cmd.getOptionValue("config"));
-        }else{
+        if (cmd.getOptionValue("d").equals("jetstream")) {
+            driver = new JetStreamDriver();
+        } else {
             logger.warning("The -d or --driver setting is not valid.");
             System.exit(1);
         }
+        driver.setCommonConfigs(driver.loadConfigs(cmd.getOptionValue("config")));
 
         logger.info("Prepare connected clients.");
         driver.setupClients();
@@ -96,7 +95,7 @@ public class Measurement {
         logger.info("Terminate client connection.");
         driver.treadownClients();
 
-        logger.info("Print client result.");
+        logger.info("Record client result.");
         driver.recordResults(cmd.getOptionValue("output", defaultOutputDir));
     }
 

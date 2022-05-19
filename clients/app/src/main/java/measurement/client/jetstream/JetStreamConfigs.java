@@ -1,42 +1,24 @@
 package measurement.client.jetstream;
 
-public class JetStreamConfigs {
-    private long execTime;
-    private Boolean recordMessage = false;
-    private long publisherRiseTime = 0;
-    private long subscriberFallTime = 0;
-    private JetStreamPubConfig pubConf;
-    private JetStreamSubConfig subConf;
+import measurement.client.base.AbstractConfigs;
 
-    public long getExecTime() {
-        return execTime;
-    }
+public class JetStreamConfigs extends AbstractConfigs {
+    private JetStreamPubConfigs pubConf;
+    private JetStreamSubConfigs subConf;
 
-    public Boolean getRecordMessage() {
-        return recordMessage;
-    }
-
-    public JetStreamPubConfig getPubConf() {
+    public JetStreamPubConfigs getPubConf() {
         return pubConf;
     }
 
-    public JetStreamSubConfig getSubConf() {
+    public JetStreamSubConfigs getSubConf() {
         return subConf;
     }
 
-    public void setExecTime(long execTime) {
-        this.execTime = execTime;
-    }
-
-    public void setRecordMessage(Boolean recordMessage) {
-        this.recordMessage = recordMessage;
-    }
-
-    public void setPubConf(JetStreamPubConfig pubConf) {
+    public void setPubConf(JetStreamPubConfigs pubConf) {
         this.pubConf = pubConf;
     }
 
-    public void setSubConf(JetStreamSubConfig subConf) {
+    public void setSubConf(JetStreamSubConfigs subConf) {
         this.subConf = subConf;
     }
 }

@@ -68,11 +68,10 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
         // スレッドが終了するまで一定時間待機する
         try {
             if (service.awaitTermination(5, TimeUnit.SECONDS)) {
-                Measurement.logger.finer("Thread closed successfully.");
+                Measurement.logger.info(clientId + " closed successfully.");
             }
         } catch (InterruptedException e) {
-            Measurement.logger.warning("Thread could not be closed.");
-            e.printStackTrace();
+            Measurement.logger.warning(clientId + " could not be closed.\n" + e.getMessage());
         }
     }
 

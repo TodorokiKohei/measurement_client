@@ -44,10 +44,10 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
     public void start() {
         Measurement.logger.info("Start " + clientId + ".");
         service = Executors.newSingleThreadScheduledExecutor();
-        if (interval == 0){
+        if (interval == 0) {
             Measurement.logger.info("Start continuing publish.");
             future = service.schedule(this, 0, TimeUnit.MICROSECONDS);
-        }else{
+        } else {
             Measurement.logger.info("Start interval publish.(interval:" + interval + " [μsec])");
             future = service.scheduleAtFixedRate(this, 0, interval, TimeUnit.MICROSECONDS);
         }
@@ -62,14 +62,14 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
         }
     }
 
-    private void recordThrouput(Record record){
-        throuputMap.merge(record.getSentTime()/1000, 1L, Long::sum);
+    private void recordThrouput(Record record) {
+        throuputMap.merge(record.getSentTime() / 1000, 1L, Long::sum);
     }
 
     // スレッドはループしてPublishを続ける
     public void continuingPublish() {
         while (!isTerminated) {
-            Record record =  publish();
+            Record record = publish();
             recordThrouput(record);
         }
     }
@@ -94,25 +94,25 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
                 Measurement.logger.info(clientId + " closed successfully.");
             }
         } catch (InterruptedException e) {
-            Measurement.logger.warning(clientId + " could not be closed.");
-            e.printStackTrace();
+            Measurement.logger.warning(clientId + " could not be closed.\n" + e.getMessage());
         }
     }
 
-    public void recordThrouput(String outputDir){
+    public void recordThrouput(String outputDir) {
         Path path = Path.of(outputDir, clientId + "-throuput.csv");
         BufferedWriter bw = null;
         try {
-            bw = Files.newBufferedWriter(path, Charset.forName("UTF-8"), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            bw = Files.newBufferedWriter(path, Charset.forName("UTF-8"), StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING);
             bw.append("time,total_msg_count");
-            bw.newLine();    
+            bw.newLine();
         } catch (Exception e) {
             Measurement.logger.warning("Failed to write results of throuput.(" + clientId + ")");
             return;
         }
-        
+
         Iterator<Map.Entry<Long, Long>> itr = throuputMap.entrySet().iterator();
-        while(itr.hasNext()){
+        while (itr.hasNext()) {
             Map.Entry<Long, Long> entry = itr.next();
             try {
                 bw.append(entry.getKey() + "," + entry.getValue());
@@ -127,8 +127,8 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
             bw.flush();
             bw.close();
         } catch (Exception e) {
-            //TODO: handle exception
         }
     }
+
     public abstract Record publish();
 }
