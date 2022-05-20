@@ -31,7 +31,6 @@ dependencies {
     implementation group: 'org.yaml', name: 'snakeyaml', version: '1.30'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.13.3'
-
 }
 
 application {
@@ -47,9 +46,19 @@ tasks.named('test') {
 sourceSets {
     main {
         resources {
-            srcDirs"src/main/configs"
+            srcDirs "src/main/configs"
         }
     }
+}
+
+jar {
+    manifest {
+        attributes (
+            "Main-Class": "measurement.client.Measurement",
+            "Class-Path": "./configs/ ../configs/",
+        ) 
+    }
+    exclude("*.yaml")
 }
 
 eclipse.classpath.file {
