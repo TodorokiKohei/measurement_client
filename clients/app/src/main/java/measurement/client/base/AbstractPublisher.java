@@ -111,12 +111,14 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
             return;
         }
 
+        Measurement.logger.info(clientId + " results.");
         Iterator<Map.Entry<Long, Long>> itr = throuputMap.entrySet().iterator();
         while (itr.hasNext()) {
             Map.Entry<Long, Long> entry = itr.next();
             try {
                 bw.append(entry.getKey() + "," + entry.getValue());
                 bw.newLine();
+                Measurement.logger.info("time: " + entry.getKey() + " throuput(msg/sec): " + entry.getValue());
             } catch (Exception e) {
                 Measurement.logger.warning("Failed to write results of throuput.(" + clientId + ")");
                 return;
