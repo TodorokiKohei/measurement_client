@@ -38,9 +38,8 @@ public class JetStreamPublisher extends AbstractPublisher {
             nc = Nats.connect(server);
             js = nc.jetStream();
         } catch (Exception e) {
-            e.printStackTrace();
+            Measurement.logger.warning("Failed to establish publisher connection.\n" + e.getMessage());
         }
-
         this.subject = subject;
         this.lastMessageNum = -1;
     }
@@ -61,6 +60,13 @@ public class JetStreamPublisher extends AbstractPublisher {
         }
         // 処理したメッセージ数を返す
         return record;
+    }
+
+    @Override
+    public Boolean isConnected() {
+        if (nc == null)
+            return false;
+        return true;
     }
 
     @Override

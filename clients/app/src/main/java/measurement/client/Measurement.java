@@ -77,8 +77,12 @@ public class Measurement {
         }
         driver.setCommonConfigs(driver.loadConfigs(cmd.getOptionValue("config")));
 
-        logger.info("Prepare connected clients.");
-        driver.setupClients();
+        logger.info("Setup connected clients.");
+        Boolean isCompleted = driver.setupClients();
+        if (!isCompleted){
+            logger.warning("Client setup failed. Terminate measurement.");
+            System.exit(1);
+        }
         driver.setupRecoder(cmd.getOptionValue("output", defaultOutputDir));
 
         logger.info("Start measurement.");

@@ -53,7 +53,8 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
         while (!isTerminated) {
             List<Record> records = subscribe();
             recordThrouput(records);
-            recorder.add(records);
+            if (recorder != null)
+                recorder.add(records);
         }
     }
 
@@ -75,20 +76,21 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
         }
     }
 
-    public void recordThrouput(String outputDir){
+    public void recordThrouput(String outputDir) {
         Path path = Path.of(outputDir, clientId + "-throuput.csv");
         BufferedWriter bw = null;
         try {
-            bw = Files.newBufferedWriter(path, Charset.forName("UTF-8"), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            bw = Files.newBufferedWriter(path, Charset.forName("UTF-8"), StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING);
             bw.append("time,total_msg_count");
-            bw.newLine();    
+            bw.newLine();
         } catch (Exception e) {
             Measurement.logger.warning("Failed to write results of throuput.(" + clientId + ")");
             return;
         }
-        
+
         Iterator<Map.Entry<Long, Long>> itr = throuputMap.entrySet().iterator();
-        while(itr.hasNext()){
+        while (itr.hasNext()) {
             Map.Entry<Long, Long> entry = itr.next();
             try {
                 bw.append(entry.getKey() + "," + entry.getValue());
@@ -103,8 +105,8 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
             bw.flush();
             bw.close();
         } catch (Exception e) {
-            //TODO: handle exception
         }
     }
+
     public abstract List<Record> subscribe();
 }

@@ -12,11 +12,30 @@
         },
         {
             "type": "java",
-            "name": "Launch Measurement",
+            "name": "Launch JetStream Measurement",
             "request": "launch",
             "mainClass": "measurement.client.Measurement",
             "projectName": "app",
-            "args": "-d jetstream"
+            "args": "-d jetstream",
+            "cwd": "${workspaceFolder}/app"
+        },
+        {
+            "type": "java",
+            "name": "Launch Pull JetStream Measurement",
+            "request": "launch",
+            "mainClass": "measurement.client.Measurement",
+            "projectName": "app",
+            "args": "-d jetstream -c src/main/configs/jetstreamconf_pull.yaml",
+            "cwd": "${workspaceFolder}/app"
+        },
+        {
+            "type": "java",
+            "name": "Launch Push JetStream Measurement",
+            "request": "launch",
+            "mainClass": "measurement.client.Measurement",
+            "projectName": "app",
+            "args": "-d jetstream -c src/main/configs/jetstreamconf_push.yaml",
+            "cwd": "${workspaceFolder}/app"
         }
     ]
 }

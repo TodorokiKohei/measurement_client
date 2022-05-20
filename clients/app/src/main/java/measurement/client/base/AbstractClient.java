@@ -17,4 +17,5 @@ public abstract class AbstractClient {
     }
     
     public abstract void close();
+    public abstract Boolean isConnected();
 }

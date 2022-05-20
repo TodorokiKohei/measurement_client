@@ -7,4 +7,7 @@ RUN gradle build
 
 FROM openjdk:11-jre-slim-bullseye as runner
 WORKDIR /clients
-COPY /clients/app/
+RUN mkdir configs results
+COPY /clients/app/build/libs/app-all.jar .
+COPY /clients/app/src/main/dist/configs/* ./configs/
+ENTRYPOINT [ "java", "-jar", "./app-all.jar"]

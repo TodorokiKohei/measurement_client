@@ -1,0 +1,20 @@
+
+execTime: 60
+recordMessage: false
+
+pubConf:
+  number: 1
+  server: "nats://nats-1"
+  stream: "STREAM"
+  subject: "STREAM.push"
+  # messageRate: "1kB"
+  messageSize: "1kb"
+
+subConf:
+  number: 1
+  server: "nats://nats-1"
+  stream: "STREAM"
+  subject: "STREAM.push"
+  durable: "push-consumer"
+  mode: push
+  maxWait: 50

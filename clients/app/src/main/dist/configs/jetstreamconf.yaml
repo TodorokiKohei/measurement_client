@@ -2,11 +2,9 @@
 execTime: 10
 
 pubConf:
-  # server: "nats://nats-1,nats://nats-2"
   server: "nats://nats-1"
   stream: "STREAM"
   subject: "STREAM.pull"
-  # messageRate: "1kB"
   messageSize: "1kB"
   number: 1
 
@@ -19,22 +17,3 @@ subConf:
   batchSize: 1
   maxWait: 50
   number: 1
-
-# pubConf:
-#   number: 1
-#   # server: "nats://nats-1,nats://nats-2"
-#   server: "nats://nats-solo"
-#   stream: "STREAM"
-#   subject: "STREAM.push"
-#   messageRate: "1kB"
-#   messageSize: "64kB"
-
-# subConf:
-#   number: 1
-#   # server: "nats://nats-1"
-#   server: "nats://nats-solo"
-#   stream: "STREAM"
-#   subject: "STREAM.push"
-#   durable: "push-consumer"
-#   mode: push
-#   maxWait: 50

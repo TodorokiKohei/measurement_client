@@ -12,14 +12,17 @@ public abstract class AbstractDriver {
     protected List<AbstractPublisher> publisher = new ArrayList<>();
     protected List<AbstractSubscriber> subscriber = new ArrayList<>();
 
-    public void setCommonConfigs(AbstractConfigs configs){
+    public void setCommonConfigs(AbstractConfigs configs) {
         this.configs = configs;
     }
 
     public abstract AbstractConfigs loadConfigs(String fileName);
-    public abstract void setupClients();
 
-    public void setupRecoder(String outputDir){
+    public abstract Boolean setupClients();
+
+    public void setupRecoder(String outputDir) {
+        if (!configs.getRecordMessage())
+            return;
         this.recorder = new Recorder(outputDir);
         for (AbstractClient client : subscriber) {
             client.setRecorder(recorder);
@@ -27,8 +30,9 @@ public abstract class AbstractDriver {
         }
     }
 
-    public void startMeasurement(){
-        recorder.start();
+    public void startMeasurement() {
+        if (recorder != null)
+            recorder.start();
         for (AbstractSubscriber sub : subscriber) {
             sub.start();
         }
@@ -42,14 +46,14 @@ public abstract class AbstractDriver {
         }
     }
 
-    public void waitForMeasurement(){
+    public void waitForMeasurement() {
         try {
             TimeUnit.SECONDS.sleep(configs.getExecTime());
         } catch (Exception e) {
         }
     }
 
-    public void stopMeasurement(){
+    public void stopMeasurement() {
         for (AbstractPublisher pub : publisher) {
             pub.terminate();
         }
@@ -61,20 +65,22 @@ public abstract class AbstractDriver {
         for (AbstractSubscriber sub : subscriber) {
             sub.terminate();
         }
-        recorder.terminate();
+        if (recorder != null)
+            recorder.terminate();
     }
 
-    public void treadownClients(){
+    public void treadownClients() {
         for (AbstractPublisher pub : publisher) {
             pub.close();
         }
         for (AbstractSubscriber sub : subscriber) {
             sub.close();
         }
-        recorder.close();
+        if (recorder != null)
+            recorder.close();
     }
 
-    public void recordResults(String outputDir){
+    public void recordResults(String outputDir) {
         for (AbstractPublisher pub : publisher) {
             pub.recordThrouput(outputDir);
         }

@@ -4,6 +4,8 @@ import io.nats.client.Connection;
 import io.nats.client.JetStream;
 import io.nats.client.JetStreamSubscription;
 import io.nats.client.Nats;
+
+import measurement.client.Measurement;
 import measurement.client.base.AbstractSubscriber;
 
 public abstract class JetStreamSubscriber extends AbstractSubscriber {
@@ -17,8 +19,15 @@ public abstract class JetStreamSubscriber extends AbstractSubscriber {
             nc = Nats.connect(server);
             js = nc.jetStream();
         } catch (Exception e) {
-            e.printStackTrace();
+            Measurement.logger.warning("Failed to establish publisher connection.\n" + e.getMessage());
         }
+    }
+
+    @Override
+    public Boolean isConnected() {
+        if (nc == null)
+            return false;
+        return true;
     }
 
     @Override
