@@ -8,9 +8,9 @@ services:
       - type: bind
         source: "./nats-cluster/nats-1/configs"
         target: "/tmp/configs"
-      # - type: bind
-      #   source: "./nats-cluster/nats-1/data"
-      #   target: "/tmp/data"
+      - type: bind
+        source: "./nats-cluster/nats-1/data"
+        target: "/tmp/data"
     command: "-c /tmp/configs/js.conf"
 
   nats-2:
@@ -20,9 +20,9 @@ services:
       - type: bind
         source: "./nats-cluster/nats-2/configs"
         target: "/tmp/configs"
-      # - type: bind
-      #   source: "./nats-cluster/nats-2/data"
-      #   target: "/tmp/data"
+      - type: bind
+        source: "./nats-cluster/nats-2/data"
+        target: "/tmp/data"
     command: "-c /tmp/configs/js.conf"
     depends_on:
       - nats-1
@@ -34,9 +34,9 @@ services:
       - type: bind
         source: "./nats-cluster/nats-3/configs"
         target: "/tmp/configs"
-      # - type: bind
-      #   source: "./nats-cluster/nats-3/data"
-      #   target: "/tmp/data"
+      - type: bind
+        source: "./nats-cluster/nats-3/data"
+        target: "/tmp/data"
     command: "-c /tmp/configs/js.conf"
     depends_on:
       - nats-1

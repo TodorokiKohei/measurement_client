@@ -58,6 +58,8 @@ public class JetStreamPushSubscriber extends JetStreamSubscriber {
             records.add(record);
 
         } catch (Exception e) {
+            Measurement.logger.warning("Error recieving message.\n" + e.getMessage());
+            e.printStackTrace();
         }
         return records;
     }

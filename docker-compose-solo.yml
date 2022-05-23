@@ -8,9 +8,9 @@ services:
       - type: bind
         source: "./nats-solo/nats-1/configs"
         target: "/tmp/configs"
-      # - type: bind
-      #   source: "./nats-solo/nats-1/data"
-      #   target: "/tmp/data"
+      - type: bind
+        source: "./nats-solo/nats-1/data"
+        target: "/tmp/data"
     command: "-c /tmp/configs/js.conf"
 
   nats-box:

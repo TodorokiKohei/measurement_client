@@ -51,7 +51,7 @@ public class JetStreamPullSubscriber extends JetStreamSubscriber {
                 records.add(new Record(payload, receivedTime, json.length(), clientId));
             } catch (Exception e) {
                 Measurement.logger.warning("Error receiving message.\n" + e.getMessage());
-                this.isTerminated = true;
+                e.printStackTrace();
             }
             msg.ack();
         }

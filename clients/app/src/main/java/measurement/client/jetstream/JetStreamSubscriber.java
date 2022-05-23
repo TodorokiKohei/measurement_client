@@ -27,6 +27,8 @@ public abstract class JetStreamSubscriber extends AbstractSubscriber {
     public Boolean isConnected() {
         if (nc == null)
             return false;
+        if (js == null)
+            return false;
         return true;
     }
 

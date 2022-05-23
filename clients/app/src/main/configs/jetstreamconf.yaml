@@ -5,7 +5,7 @@ pubConf:
   server: "nats://nats-1"
   stream: "STREAM"
   subject: "STREAM.pull"
-  messageRate: "1kB"
+  # messageRate: "1kB"
   messageSize: "1kB"
   number: 1
 

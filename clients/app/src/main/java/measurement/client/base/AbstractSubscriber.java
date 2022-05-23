@@ -17,16 +17,16 @@ import java.util.concurrent.TimeUnit;
 import measurement.client.Measurement;
 
 public abstract class AbstractSubscriber extends AbstractClient implements Runnable {
-    protected Map<Long, Long> throuputMap;
     protected volatile boolean isTerminated;
+    protected Map<Long, Long[]> throuputMap;
 
     protected ScheduledExecutorService service;
     protected ScheduledFuture<?> future;
 
     public AbstractSubscriber(String clientId) {
         super(clientId);
-        this.throuputMap = new TreeMap<Long, Long>();
         this.isTerminated = false;
+        this.throuputMap = new TreeMap<Long, Long[]>();
     }
 
     public void start() {
@@ -42,7 +42,14 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
 
     private void recordThrouput(List<Record> records) {
         for (Record record : records) {
-            throuputMap.merge(record.getReceivedTime() / 1000, 1L, Long::sum);
+            Long recievedTimeSec = record.getReceivedTime() / 1000;
+            if (throuputMap.containsKey(recievedTimeSec)) {
+                Long[] array = throuputMap.get(recievedTimeSec);
+                array[0]++;
+                array[1] += record.getSize();
+            } else {
+                throuputMap.put(recievedTimeSec, new Long[] { 1L, record.getSize().longValue() });
+            }
         }
     }
 
@@ -82,7 +89,7 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
         try {
             bw = Files.newBufferedWriter(path, Charset.forName("UTF-8"), StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING);
-            bw.append("time,total_msg_count");
+            bw.append("time,message_count_totla,message_bytes_total");
             bw.newLine();
         } catch (Exception e) {
             Measurement.logger.warning("Failed to write results of throuput.(" + clientId + ")");
@@ -90,13 +97,14 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
         }
 
         Measurement.logger.info(clientId + " results.");
-        Iterator<Map.Entry<Long, Long>> itr = throuputMap.entrySet().iterator();
+        Iterator<Map.Entry<Long, Long[]>> itr = throuputMap.entrySet().iterator();
         while (itr.hasNext()) {
-            Map.Entry<Long, Long> entry = itr.next();
+            Map.Entry<Long, Long[]> entry = itr.next();
             try {
-                bw.append(entry.getKey() + "," + entry.getValue());
+                bw.append(entry.getKey() + "," + entry.getValue()[0] + "," + entry.getValue()[1]);
                 bw.newLine();
-                Measurement.logger.info("time: " + entry.getKey() + " throuput(msg/sec): " + entry.getValue());
+                Measurement.logger.info("time: " + entry.getKey() + ", throuput(msg/sec): " + entry.getValue()[0]
+                        + ",  throuput(byte/sec): " + entry.getValue()[1]);
             } catch (Exception e) {
                 Measurement.logger.warning("Failed to write results of throuput.(" + clientId + ")");
                 return;

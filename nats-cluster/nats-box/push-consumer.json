@@ -1,0 +1,13 @@
+{
+    "ack_policy": "explicit",
+    "ack_wait": 30000000000,
+    "deliver_policy": "last",
+    "deliver_subject": "_INBOX.r1F8SMIm2JNEVmMPvDLpj4",
+    "deliver_group": "push-consumer-queue",
+    "durable_name": "push-consumer",
+    "filter_subject": "STREAM.push",
+    "max_ack_pending": 1000,
+    "max_deliver": -1,
+    "replay_policy": "instant"
+  }
+  

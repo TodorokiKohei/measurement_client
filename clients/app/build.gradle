@@ -61,6 +61,16 @@ jar {
     exclude("*.yaml")
 }
 
+shadowJar {
+    manifest {
+        attributes (
+            "Main-Class": "measurement.client.Measurement",
+            "Class-Path": "./configs/ ../configs/",
+        ) 
+    }
+    exclude("*.yaml")
+}
+
 eclipse.classpath.file {
     whenMerged { classpath ->
         classpath.entries.removeAll { entry -> (entry.path.endsWith('dll') || entry.path.endsWith('so') || entry.path.endsWith('dylib')) }

@@ -1,6 +1,5 @@
-
 execTime: 60
-recordMessage: false
+recordMessage: true
 
 pubConf:
   number: 1
@@ -8,7 +7,8 @@ pubConf:
   stream: "STREAM"
   subject: "STREAM.push"
   # messageRate: "1kB"
-  messageSize: "1kb"
+  messageSize: "100kb"
+  # messageSize: "1kb"
 
 subConf:
   number: 1
@@ -16,5 +16,6 @@ subConf:
   stream: "STREAM"
   subject: "STREAM.push"
   durable: "push-consumer"
+  queueGroup: "push-consumer-queue"
   mode: push
   maxWait: 50

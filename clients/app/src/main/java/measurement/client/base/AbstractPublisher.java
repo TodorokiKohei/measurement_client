@@ -13,6 +13,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.lang3.RandomStringUtils;
 
 import measurement.client.Measurement;
@@ -21,8 +23,9 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
     protected long interval;
     protected int messageSize;
 
-    protected Map<Long, Long> throuputMap;
+    protected volatile String messageData;
     protected volatile boolean isTerminated;
+    protected Map<Long, Long[]> throuputMap;
 
     protected ScheduledExecutorService service;
     protected ScheduledFuture<?> future;
@@ -32,12 +35,27 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
         this.interval = interval;
         this.messageSize = messageSize;
 
-        this.throuputMap = new TreeMap<Long, Long>();
+        this.messageData = null;
         this.isTerminated = false;
+        this.throuputMap = new TreeMap<Long, Long[]>();
     }
 
-    protected String createMessage() {
-        return RandomStringUtils.randomAscii(messageSize);
+    protected void setMessageData(Payload payload) {
+        if (messageData == null)
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                String json = mapper.writeValueAsString(payload);
+                if (messageSize - json.length() < 0) {
+                    Measurement.logger.warning("Message size is too small.");
+                    this.messageData = "";
+                } else {
+                    this.messageData = RandomStringUtils.randomAscii(messageSize - json.length());
+                }
+            } catch (Exception e) {
+                Measurement.logger.warning("Failed to serialize payload class to json string.\n" + e.getMessage());
+                this.messageData = "";
+            }
+        payload.data = this.messageData;
     }
 
     // スレッド起動処理
@@ -53,6 +71,17 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
         }
     }
 
+    private void recordThrouput(Record record) {
+        Long sentTimeSec = record.getSentTime() / 1000;
+        if (throuputMap.containsKey(sentTimeSec)) {
+            Long[] array = throuputMap.get(sentTimeSec);
+            array[0]++;
+            array[1] += record.getSize();
+        } else {
+            throuputMap.put(sentTimeSec, new Long[] { 1L, record.getSize().longValue() });
+        }
+    }
+
     @Override
     public void run() {
         if (interval == 0) {
@@ -60,10 +89,6 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
         } else {
             intervalPublish();
         }
-    }
-
-    private void recordThrouput(Record record) {
-        throuputMap.merge(record.getSentTime() / 1000, 1L, Long::sum);
     }
 
     // スレッドはループしてPublishを続ける
@@ -78,7 +103,8 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
     public void intervalPublish() {
         if (!isTerminated) {
             Record record = publish();
-            recordThrouput(record);
+            if (record != null)
+                recordThrouput(record);
         }
     }
 
@@ -98,13 +124,14 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
         }
     }
 
+    // スループットをファイルに書き込み
     public void recordThrouput(String outputDir) {
         Path path = Path.of(outputDir, clientId + "-throuput.csv");
         BufferedWriter bw = null;
         try {
             bw = Files.newBufferedWriter(path, Charset.forName("UTF-8"), StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING);
-            bw.append("time,total_msg_count");
+            bw.append("time,message_count_totla,message_bytes_total");
             bw.newLine();
         } catch (Exception e) {
             Measurement.logger.warning("Failed to write results of throuput.(" + clientId + ")");
@@ -112,13 +139,14 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
         }
 
         Measurement.logger.info(clientId + " results.");
-        Iterator<Map.Entry<Long, Long>> itr = throuputMap.entrySet().iterator();
+        Iterator<Map.Entry<Long, Long[]>> itr = throuputMap.entrySet().iterator();
         while (itr.hasNext()) {
-            Map.Entry<Long, Long> entry = itr.next();
+            Map.Entry<Long, Long[]> entry = itr.next();
             try {
-                bw.append(entry.getKey() + "," + entry.getValue());
+                bw.append(entry.getKey() + "," + entry.getValue()[0] + "," + entry.getValue()[1]);
                 bw.newLine();
-                Measurement.logger.info("time: " + entry.getKey() + " throuput(msg/sec): " + entry.getValue());
+                Measurement.logger.info("time: " + entry.getKey() + ", throuput(msg/sec): " + entry.getValue()[0]
+                        + ",  throuput(byte/sec): " + entry.getValue()[1]);
             } catch (Exception e) {
                 Measurement.logger.warning("Failed to write results of throuput.(" + clientId + ")");
                 return;
