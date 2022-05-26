@@ -48,7 +48,9 @@ public abstract class AbstractDriver {
 
     public void waitForMeasurement() {
         try {
-            TimeUnit.SECONDS.sleep(configs.getExecTime());
+            long sleepTime = configs.getExecTime() - configs.getPublisherRiseTime() - configs.getSubscriberFallTime();
+            Measurement.logger.info("Wait " + sleepTime + " seconds for measurement.");
+            TimeUnit.SECONDS.sleep(sleepTime);
         } catch (Exception e) {
         }
     }

@@ -1,0 +1,21 @@
+
+execTime: 30
+recordMessage: true
+publisherRiseTime: 5
+subscriberFallTime: 5
+
+pubConf:
+  number: 1
+  messageSize: 1kb
+  # messageRate: 1kb
+  topicName: "test-topic"
+  properties:
+    bootstrap.servers: "kafka-1:9092"
+
+subConf:
+  number: 1
+  maxWait: 500
+  topicName: "test-topic"
+  properties:
+    bootstrap.servers: "kafka-1:9092"
+    group.id: "consumer-group"

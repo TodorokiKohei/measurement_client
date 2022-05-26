@@ -75,7 +75,7 @@ public class JetStreamDriver extends AbstractDriver {
         Boolean allOk = true;
         for (int i = 0; i < jetStreamConfigs.getPubConf().getNumber(); i++) {
             JetStreamPublisher jsPub = new JetStreamPublisher(
-                    "publisher-" + i,
+                    "jetstream-publisher-" + i,
                     interval,
                     (int) Utils.byteStringToDouble(jspc.getMessageSize()),
                     jspc.getServer(),

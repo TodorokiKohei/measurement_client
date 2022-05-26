@@ -12,6 +12,7 @@ import org.apache.commons.cli.ParseException;
 
 import measurement.client.base.AbstractDriver;
 import measurement.client.jetstream.JetStreamDriver;
+import measurement.client.kafka.KafkaDriver;
 
 public class Measurement {
 
@@ -71,7 +72,9 @@ public class Measurement {
         AbstractDriver driver = null;
         if (cmd.getOptionValue("d").equals("jetstream")) {
             driver = new JetStreamDriver();
-        } else {
+        } else if (cmd.getOptionValue("d").equals("kafka")){
+            driver = new KafkaDriver();
+        }else {
             logger.warning("The -d or --driver setting is not valid.");
             System.exit(1);
         }

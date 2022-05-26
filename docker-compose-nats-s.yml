@@ -8,8 +8,8 @@ services:
       - type: bind
         source: "./nats-solo/nats-1/configs"
         target: "/tmp/configs"
-      - type: bind
-        source: "./nats-solo/nats-1/data"
+      - type: volume
+        source: nats-1-data
         target: "/tmp/data"
     command: "-c /tmp/configs/js.conf"
 
@@ -35,3 +35,6 @@ services:
         target: "/code"
     tty: true
     stdin_open: true
+
+volumes:
+  nats-1-data:

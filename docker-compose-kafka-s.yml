@@ -1,0 +1,55 @@
+version: "3.8"
+
+x-zoo-envs: &zoo-envs
+  ZOOKEEPER_CLIENT_PORT: 2181
+  ZOOKEEPER_TICK_TIME: 2000
+  # ZOOKEEPER_SERVERS: zoo-1:2888:3888;zoo-2:2888:3888;zoo-3:2888:3888
+
+x-kafka-envs: &kafka-envs
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT
+  KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+  KAFKA_ZOOKEEPER_CONNECT: zoo-1:2181
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+  # KAFKA_ZOOKEEPER_CONNECT: zoo-1:2181,zoo-2:2181,zoo-3:2181
+  # KAFKA_MIN_INSYNC_REPLICAS: 3
+  # KAFKA_REPLICA_LAG_TIME_MAX_MS: 30000
+  # KAFKA_REPLICA_SOCKET_RECEIVE_BUFFER_BYTES: 256000
+  # KAFKA_SOCKET_SEND_BUFFER_BYTES: 10485760
+  # KAFKA_SOCKET_RECEIVE_BUFFER_BYTES: 10485760
+
+services:
+  zoo-1:
+    container_name: zoo-1
+    hostname: zoo-1
+    image: confluentinc/cp-zookeeper:6.2.4
+    ports:
+      - "2181:2181"
+    environment:
+      <<: *zoo-envs
+
+  kafka1:
+    container_name: kafka-1
+    hostname: kafka-1
+    image: confluentinc/cp-kafka:6.2.4
+    depends_on:
+      - zoo-1
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka-1:9092
+      <<: *kafka-envs
+
+  clients:
+    container_name: "clients"
+    build: ./clients
+    volumes:
+      - type: bind
+        source: "./clients"
+        target: "/code"
+    tty: true
+    stdin_open: true
+  

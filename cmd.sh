@@ -26,3 +26,21 @@ rm_data(){
 	root_dir=$1
 	sudo find "./${root_dir}" -name "data" -type d | xargs sudo rm -r
 }
+
+
+up-containers(){
+	if [[ $# != 1 ]]; then
+		echo "useage: up-containers name"
+		return 1
+	fi
+	docker-compose -f "docker-compose-${1}.yml" up -d
+}
+
+
+down-containers(){
+	if [[ $# != 1 ]]; then
+		echo "useage: down-containers name"
+		return 1
+	fi
+	docker-compose -f "docker-compose-${1}.yml" down -v
+}

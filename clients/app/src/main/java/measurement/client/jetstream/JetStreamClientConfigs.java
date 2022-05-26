@@ -1,6 +1,6 @@
 package measurement.client.jetstream;
 
-public abstract class JetStreamClientConfig {
+public abstract class JetStreamClientConfigs {
     private String server;
     private String stream;
     private String subject;

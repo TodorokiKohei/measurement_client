@@ -8,8 +8,8 @@ services:
       - type: bind
         source: "./nats-cluster/nats-1/configs"
         target: "/tmp/configs"
-      - type: bind
-        source: "./nats-cluster/nats-1/data"
+      - type: volume
+        source: nats-1-data
         target: "/tmp/data"
     command: "-c /tmp/configs/js.conf"
 
@@ -20,8 +20,8 @@ services:
       - type: bind
         source: "./nats-cluster/nats-2/configs"
         target: "/tmp/configs"
-      - type: bind
-        source: "./nats-cluster/nats-2/data"
+      - type: volume
+        source: nats-2-data
         target: "/tmp/data"
     command: "-c /tmp/configs/js.conf"
     depends_on:
@@ -34,8 +34,8 @@ services:
       - type: bind
         source: "./nats-cluster/nats-3/configs"
         target: "/tmp/configs"
-      - type: bind
-        source: "./nats-cluster/nats-3/data"
+      - type: volume
+        source: nats-3-data
         target: "/tmp/data"
     command: "-c /tmp/configs/js.conf"
     depends_on:
@@ -65,3 +65,8 @@ services:
         target: "/code"
     tty: true
     stdin_open: true
+
+volumes:
+  nats-1-data:
+  nats-2-data:
+  nats-3-data:

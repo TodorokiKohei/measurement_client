@@ -1,6 +1,6 @@
-package measurement.client.jetstream;
+package measurement.client.kafka;
 
-public class JetStreamPubConfigs extends JetStreamClientConfigs {
+public class KafkaPubConfigs extends KafkaClientConfigs{
     private String messageRate = "0";
     private String messageSize;
 
@@ -19,5 +19,4 @@ public class JetStreamPubConfigs extends JetStreamClientConfigs {
     public void setMessageSize(String messageSize) {
         this.messageSize = messageSize;
     }
-
 }

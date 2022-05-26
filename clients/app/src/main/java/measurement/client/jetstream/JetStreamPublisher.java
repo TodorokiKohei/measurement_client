@@ -6,7 +6,6 @@ import measurement.client.base.Payload;
 import measurement.client.base.Record;
 
 import java.time.Duration;
-import java.time.Instant;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -24,11 +23,11 @@ public class JetStreamPublisher extends AbstractPublisher {
     private PublishOptions pubOptions;
 
     private String subject;
-    private int lastMessageNum;
 
     public JetStreamPublisher(String clientId, long interval, int messageSize, String server, String stream,
             String subject) {
         super(clientId, interval, messageSize);
+        this.subject = subject;
 
         Builder builder = PublishOptions.builder();
         if (stream != null) {
@@ -43,15 +42,12 @@ public class JetStreamPublisher extends AbstractPublisher {
         } catch (Exception e) {
             Measurement.logger.warning("Failed to establish publisher connection.\n" + e.getMessage());
         }
-        this.subject = subject;
-        this.lastMessageNum = -1;
     }
 
     @Override
     public Record publish() {
         // ペイロード作成
-        Payload payload = new Payload(clientId, ++lastMessageNum, Instant.now().toEpochMilli());
-        setMessageData(payload);
+        Payload payload = createPayload();
         Record record = null;
         try {
             ObjectMapper mapper = new ObjectMapper();

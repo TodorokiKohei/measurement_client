@@ -36,6 +36,8 @@ dependencies {
 application {
     // Define the main class for the application.
     mainClass = 'measurement.client.Measurement'
+    // mainClass = 'measurement.client.KafkaPub'
+    // mainClass = 'measurement.client.KafkaSub'
 }
 
 tasks.named('test') {

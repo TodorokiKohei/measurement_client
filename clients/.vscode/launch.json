@@ -6,6 +6,21 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch KafkaSub",
+            "request": "launch",
+            "mainClass": "measurement.client.KafkaSub",
+            "projectName": "app"
+        },
+        {
+            "type": "java",
+            "name": "Launch KafkaPub",
+            "request": "launch",
+            "mainClass": "measurement.client.KafkaPub",
+            "projectName": "app",
+            "cwd": "${workspaceFolder}/app"
+        },
+        {
+            "type": "java",
             "name": "Launch Current File",
             "request": "launch",
             "mainClass": "${file}"
@@ -35,6 +50,15 @@
             "mainClass": "measurement.client.Measurement",
             "projectName": "app",
             "args": "-d jetstream -c src/main/configs/jetstreamconf_push.yaml",
+            "cwd": "${workspaceFolder}/app"
+        },
+        {
+            "type": "java",
+            "name": "Launch Kafka Measurement",
+            "request": "launch",
+            "mainClass": "measurement.client.Measurement",
+            "projectName": "app",
+            "args": "-d kafka",
             "cwd": "${workspaceFolder}/app"
         }
     ]

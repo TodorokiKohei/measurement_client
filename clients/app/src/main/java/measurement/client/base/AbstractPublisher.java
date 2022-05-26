@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -22,6 +23,7 @@ import measurement.client.Measurement;
 public abstract class AbstractPublisher extends AbstractClient implements Runnable {
     protected long interval;
     protected int messageSize;
+    protected int lastMessageNum;
 
     protected volatile String messageData;
     protected volatile boolean isTerminated;
@@ -34,10 +36,31 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
         super(clientId);
         this.interval = interval;
         this.messageSize = messageSize;
+        this.lastMessageNum = -1;
 
         this.messageData = null;
         this.isTerminated = false;
         this.throuputMap = new TreeMap<Long, Long[]>();
+    }
+
+    protected Payload createPayload() {
+        Payload payload = new Payload(clientId, ++lastMessageNum, Instant.now().toEpochMilli());
+        if (messageData == null)
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                String json = mapper.writeValueAsString(payload);
+                if (messageSize - json.length() < 0) {
+                    Measurement.logger.warning("Message size is too small.");
+                    this.messageData = "";
+                } else {
+                    this.messageData = RandomStringUtils.randomAscii(messageSize - json.length());
+                }
+            } catch (Exception e) {
+                Measurement.logger.warning("Failed to serialize payload class to json string.\n" + e.getMessage());
+                this.messageData = "";
+            }
+        payload.data = this.messageData;
+        return payload;
     }
 
     protected void setMessageData(Payload payload) {

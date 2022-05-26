@@ -1,6 +1,6 @@
 package measurement.client.jetstream;
 
-public class JetStreamSubConfigs extends JetStreamClientConfig {
+public class JetStreamSubConfigs extends JetStreamClientConfigs {
     private String durable;
     private int batchSize;
     private long maxWait;    
