@@ -1,23 +1,33 @@
 package measurement.client.jetstream;
 
-public class JetStreamPubConfigs extends JetStreamClientConfigs {
-    private String messageRate = "0";
-    private String messageSize;
+import measurement.client.base.CommonPubConfigs;
 
-    public String getMessageRate() {
-        return messageRate;
+public class JetStreamPubConfigs extends CommonPubConfigs {
+    private String server;
+    private String stream;
+    private String subject;
+
+    public String getServer() {
+        return server;
     }
 
-    public String getMessageSize() {
-        return messageSize;
+    public String getStream() {
+        return stream;
     }
 
-    public void setMessageRate(String messageRate) {
-        this.messageRate = messageRate;
+    public String getSubject() {
+        return subject;
     }
 
-    public void setMessageSize(String messageSize) {
-        this.messageSize = messageSize;
+    public void setServer(String server) {
+        this.server = server;
     }
 
+    public void setStream(String stream) {
+        this.stream = stream;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
 }

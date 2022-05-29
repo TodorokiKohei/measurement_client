@@ -1,24 +1,24 @@
 package measurement.client.jetstream;
 
-import measurement.client.base.AbstractConfigs;
+import measurement.client.base.MeasurementConfigs;
 
-public class JetStreamConfigs extends AbstractConfigs {
-    private JetStreamPubConfigs pubConf;
-    private JetStreamSubConfigs subConf;
+public class JetStreamConfigs extends MeasurementConfigs<JetStreamPubConfigs, JetStreamSubConfigs> {
+    // private JetStreamPubConfigs pubConf;
+    // private JetStreamSubConfigs subConf;
 
-    public JetStreamPubConfigs getPubConf() {
-        return pubConf;
-    }
+    // public JetStreamPubConfigs getPubConf() {
+    //     return pubConf;
+    // }
 
-    public JetStreamSubConfigs getSubConf() {
-        return subConf;
-    }
+    // public JetStreamSubConfigs getSubConf() {
+    //     return subConf;
+    // }
 
-    public void setPubConf(JetStreamPubConfigs pubConf) {
-        this.pubConf = pubConf;
-    }
+    // public void setPubConf(JetStreamPubConfigs pubConf) {
+    //     this.pubConf = pubConf;
+    // }
 
-    public void setSubConf(JetStreamSubConfigs subConf) {
-        this.subConf = subConf;
-    }
+    // public void setSubConf(JetStreamSubConfigs subConf) {
+    //     this.subConf = subConf;
+    // }
 }

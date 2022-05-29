@@ -7,6 +7,7 @@ import java.io.InputStream;
 import org.yaml.snakeyaml.Yaml;
 
 import measurement.client.Measurement;
+import measurement.client.jetstream.JetStreamConfigs;
 
 public class Utils {
 
@@ -14,9 +15,9 @@ public class Utils {
         if (messageRate == null)
             return 0;
         long messageNum = byteStringToDouble(messageRate) / byteStringToDouble(messageSize);
-        if (messageNum == 0){
+        if (messageNum == 0) {
             return 0;
-        } else{
+        } else {
             return 1000000 / messageNum;
         }
     }
@@ -33,7 +34,8 @@ public class Utils {
         return byteLong;
     }
 
-    public static <E extends CommonConfigs> E loadConfigsFromYaml(String resourceName, String fileName, Class<E> cls) throws FileNotFoundException{
+    public static <E extends MeasurementConfigs<? extends CommonPubConfigs, ? extends CommonSubConfigs>> E loadConfigsFromYaml(
+            String resourceName, String fileName, Class<E> cls) throws FileNotFoundException {
         InputStream is = null;
         if (fileName == null) {
             // 指定がなければクラスパス内のリソースファイルを読み込み

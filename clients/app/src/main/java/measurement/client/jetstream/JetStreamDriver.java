@@ -1,9 +1,14 @@
 package measurement.client.jetstream;
 
 import java.io.FileNotFoundException;
+import java.io.InputStream;
+
+import org.yaml.snakeyaml.Yaml;
 
 import measurement.client.Measurement;
-import measurement.client.base.CommonConfigs;
+import measurement.client.base.MeasurementConfigs;
+import measurement.client.base.CommonPubConfigs;
+import measurement.client.base.CommonSubConfigs;
 import measurement.client.base.AbstractDriver;
 import measurement.client.base.Utils;
 
@@ -11,9 +16,9 @@ public class JetStreamDriver extends AbstractDriver {
 
     private static final String resourceName = "/jetstreamconf.yaml";
 
-    private JetStreamConfigs jetStreamConfigs;
+    private MeasurementConfigs<JetStreamPubConfigs, JetStreamSubConfigs> jetStreamConfigs;
 
-    public CommonConfigs loadConfigs(String fileName) {
+    public MeasurementConfigs<? extends CommonPubConfigs, ? extends CommonSubConfigs> loadConfigs(String fileName) {
         try {
             jetStreamConfigs = Utils.loadConfigsFromYaml(resourceName, fileName, JetStreamConfigs.class);
         } catch (FileNotFoundException e) {

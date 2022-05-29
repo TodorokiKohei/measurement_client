@@ -1,10 +1,13 @@
 package measurement.client.base;
 
-public abstract class CommonConfigs<T extends AbstractPublisherConfigs, U extends AbstractSubscriberConfigs> {
+public abstract class MeasurementConfigs<T , U> {
     protected long execTime;
     protected Boolean recordMessage = false;
     protected long publisherRiseTime = 0;
     protected long subscriberFallTime = 0;
+
+    protected T pubConf;
+    protected U subConf;
 
     public long getExecTime() {
         return execTime;
@@ -22,6 +25,14 @@ public abstract class CommonConfigs<T extends AbstractPublisherConfigs, U extend
         return subscriberFallTime;
     }
 
+    public T getPubConf(){
+        return pubConf;
+    }
+
+    public U getSubConf(){
+        return subConf;
+    }
+
     public void setExecTime(long execTime) {
         this.execTime = execTime;
     }
@@ -36,5 +47,13 @@ public abstract class CommonConfigs<T extends AbstractPublisherConfigs, U extend
 
     public void setSubscriberFallTime(long subscriberFallTime) {
         this.subscriberFallTime = subscriberFallTime;
+    }
+
+    public void setPubConf(T pubConf){
+        this.pubConf = pubConf;
+    }
+
+    public void setSubConf(U subConf){
+        this.subConf = subConf;
     }
 }
