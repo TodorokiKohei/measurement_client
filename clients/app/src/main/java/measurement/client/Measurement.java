@@ -16,6 +16,7 @@ import measurement.client.base.CommonSubConfigs;
 import measurement.client.base.MeasurementConfigs;
 import measurement.client.jetstream.JetStreamDriver;
 import measurement.client.kafka.KafkaDriver;
+import measurement.client.nats.NatsDriver;
 
 public class Measurement {
 
@@ -77,7 +78,9 @@ public class Measurement {
             driver = new JetStreamDriver();
         } else if (cmd.getOptionValue("d").equals("kafka")) {
             driver = new KafkaDriver();
-        } else {
+        } else if (cmd.getOptionValue("d").equals("nats")){
+            driver = new NatsDriver();
+        }else {
             logger.warning("The -d or --driver setting is not valid.");
             System.exit(1);
         }

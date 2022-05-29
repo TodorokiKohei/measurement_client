@@ -1,6 +1,5 @@
 
 execTime: 30
-recordMessage: true
 publisherRiseTime: 5
 subscriberFallTime: 5
 
