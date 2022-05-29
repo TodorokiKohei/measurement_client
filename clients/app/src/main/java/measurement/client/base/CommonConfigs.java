@@ -1,6 +1,6 @@
 package measurement.client.base;
 
-public abstract class AbstractConfigs {
+public abstract class CommonConfigs<T extends AbstractPublisherConfigs, U extends AbstractSubscriberConfigs> {
     protected long execTime;
     protected Boolean recordMessage = false;
     protected long publisherRiseTime = 0;

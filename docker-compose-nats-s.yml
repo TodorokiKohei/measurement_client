@@ -1,5 +1,9 @@
 version: "3.8"
 
+x-nats-cmd: &nats-cmd
+  command: "-c /tmp/configs/core.conf"
+  # command: "-c /tmp/configs/js.conf"
+
 services:
   nats-1:
     container_name: "nats-1"
@@ -11,7 +15,7 @@ services:
       - type: volume
         source: nats-1-data
         target: "/tmp/data"
-    command: "-c /tmp/configs/js.conf"
+    <<: *nats-cmd
 
   nats-box:
     container_name: nats-box

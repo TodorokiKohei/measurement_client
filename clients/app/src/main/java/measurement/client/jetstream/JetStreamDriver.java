@@ -1,13 +1,9 @@
 package measurement.client.jetstream;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
-
-import org.yaml.snakeyaml.Yaml;
 
 import measurement.client.Measurement;
-import measurement.client.base.AbstractConfigs;
+import measurement.client.base.CommonConfigs;
 import measurement.client.base.AbstractDriver;
 import measurement.client.base.Utils;
 
@@ -17,37 +13,14 @@ public class JetStreamDriver extends AbstractDriver {
 
     private JetStreamConfigs jetStreamConfigs;
 
-    public AbstractConfigs loadConfigs(String fileName) {
-        // yaml形式の設定ファイルを読み込み
-        InputStream is = null;
+    public CommonConfigs loadConfigs(String fileName) {
         try {
-            if (fileName == null) {
-                // 指定がなければクラスパス内のデフォルトファイルを読み込み
-                is = AbstractDriver.class.getResourceAsStream(resourceName);
-                Measurement.logger.info("Load resource file.(" + resourceName + ")");
-                if (is == null)
-                    throw new FileNotFoundException();
-            } else {
-                // 引数のファイルを読み込み
-                is = new FileInputStream(fileName);
-                Measurement.logger.info("Load argument file.(" + fileName + ")");
-            }
+            jetStreamConfigs = Utils.loadConfigsFromYaml(resourceName, fileName, JetStreamConfigs.class);
         } catch (FileNotFoundException e) {
-            if (fileName == null) {
-                Measurement.logger.warning(resourceName + " not found.");
-            } else {
-                Measurement.logger.warning(fileName + " not found.");
-            }
+            Measurement.logger.warning(e.getMessage());
+            e.printStackTrace();
             System.exit(1);
-        }
-        Yaml yaml = new Yaml();
-        jetStreamConfigs = yaml.loadAs(is, JetStreamConfigs.class);
-        try {
-            if (is != null) {
-                is.close();
-            }
-        } catch (Exception e) {
-        }
+        }        
         return jetStreamConfigs;
     }
 

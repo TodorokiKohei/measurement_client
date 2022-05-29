@@ -1,5 +1,13 @@
 package measurement.client.base;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
+import org.yaml.snakeyaml.Yaml;
+
+import measurement.client.Measurement;
+
 public class Utils {
 
     public static long calcMicroSecInterval(String messageRate, String messageSize) {
@@ -23,5 +31,23 @@ public class Utils {
             byteLong *= 1000 * 1000;
         }
         return byteLong;
+    }
+
+    public static <E extends CommonConfigs> E loadConfigsFromYaml(String resourceName, String fileName, Class<E> cls) throws FileNotFoundException{
+        InputStream is = null;
+        if (fileName == null) {
+            // 指定がなければクラスパス内のリソースファイルを読み込み
+            is = AbstractDriver.class.getResourceAsStream(resourceName);
+            Measurement.logger.info("Load resource file.(" + resourceName + ")");
+            if (is == null)
+                throw new FileNotFoundException(resourceName + " not found.");
+        } else {
+            // 指定されたファイルを読み込み
+            is = new FileInputStream(fileName);
+            Measurement.logger.info("Load argument file.(" + fileName + ")");
+        }
+        Yaml yaml = new Yaml();
+        E configs = yaml.loadAs(is, cls);
+        return configs;
     }
 }

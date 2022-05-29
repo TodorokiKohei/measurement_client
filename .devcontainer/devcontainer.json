@@ -2,7 +2,7 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.231.6/containers/java
 {
 	"name": "nats",
-	"dockerComposeFile": "../docker-compose-kafka-s.yml",
+	"dockerComposeFile": "../docker-compose-nats-s.yml",
 	"service": "clients",
 	"remoteUser": "vscode",
 	"shutdownAction": "none",

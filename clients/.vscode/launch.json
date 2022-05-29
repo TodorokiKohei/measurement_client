@@ -8,22 +8,17 @@
             "type": "java",
             "name": "Launch KafkaSub",
             "request": "launch",
-            "mainClass": "measurement.client.KafkaSub",
-            "projectName": "app"
-        },
-        {
-            "type": "java",
-            "name": "Launch KafkaPub",
-            "request": "launch",
-            "mainClass": "measurement.client.KafkaPub",
+            "mainClass": "measurement.client.sample.KafkaSub",
             "projectName": "app",
             "cwd": "${workspaceFolder}/app"
         },
         {
             "type": "java",
-            "name": "Launch Current File",
+            "name": "Launch KafkaPub",
             "request": "launch",
-            "mainClass": "${file}"
+            "mainClass": "measurement.client.sample.KafkaPub",
+            "projectName": "app",
+            "cwd": "${workspaceFolder}/app"
         },
         {
             "type": "java",
