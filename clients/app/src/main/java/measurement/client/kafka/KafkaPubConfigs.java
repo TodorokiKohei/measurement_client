@@ -1,22 +1,28 @@
 package measurement.client.kafka;
 
-public class KafkaPubConfigs extends KafkaClientConfigs{
-    private String messageRate = "0";
-    private String messageSize;
+import java.util.Properties;
 
-    public String getMessageRate() {
-        return messageRate;
+import measurement.client.base.CommonPubConfigs;
+
+public class KafkaPubConfigs extends CommonPubConfigs {
+    
+    private String topicName;
+    private Properties properties;
+
+    public String getTopicName() {
+        return topicName;
     }
 
-    public String getMessageSize() {
-        return messageSize;
+    public Properties getProperties() {
+        return properties;
     }
 
-    public void setMessageRate(String messageRate) {
-        this.messageRate = messageRate;
+    public void setTopicName(String topicName) {
+        this.topicName = topicName;
     }
 
-    public void setMessageSize(String messageSize) {
-        this.messageSize = messageSize;
+    public void setProperties(Properties properties) {
+        this.properties = properties;
     }
+
 }

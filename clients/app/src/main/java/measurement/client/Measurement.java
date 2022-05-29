@@ -11,6 +11,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import measurement.client.base.AbstractDriver;
+import measurement.client.base.CommonPubConfigs;
+import measurement.client.base.CommonSubConfigs;
+import measurement.client.base.MeasurementConfigs;
 import measurement.client.jetstream.JetStreamDriver;
 import measurement.client.kafka.KafkaDriver;
 
@@ -20,7 +23,7 @@ public class Measurement {
     private CommandLine cmd = null;
     public static final Logger logger = Logger.getLogger(Measurement.class.getName());
 
-    // 引数の解析処理を実行
+    // 引数の追加や解析を行う
     private void parseArgs(String[] args) {
         Options options = new Options();
         options.addOption(Option.builder("c")
@@ -54,7 +57,7 @@ public class Measurement {
         }
     }
 
-    // loggerの初期設定
+    // loggerのレベルやフォーマットを設定する
     private void initLogger() {
         // levelの設定（デフォルトではINFO）
         if (cmd.getOptionValue("log-level") == null) {
@@ -72,17 +75,21 @@ public class Measurement {
         AbstractDriver driver = null;
         if (cmd.getOptionValue("d").equals("jetstream")) {
             driver = new JetStreamDriver();
-        } else if (cmd.getOptionValue("d").equals("kafka")){
+        } else if (cmd.getOptionValue("d").equals("kafka")) {
             driver = new KafkaDriver();
-        }else {
+        } else {
             logger.warning("The -d or --driver setting is not valid.");
             System.exit(1);
         }
-        driver.setCommonConfigs(driver.loadConfigs(cmd.getOptionValue("config")));
+
+        // 共通コンフィグを取得
+        MeasurementConfigs<? extends CommonPubConfigs, ? extends CommonSubConfigs> configs = driver
+                .loadConfigs(cmd.getOptionValue("config"));
+        driver.setCommonConfigs(configs);
 
         logger.info("Setup connected clients.");
         Boolean isCompleted = driver.setupClients();
-        if (!isCompleted){
+        if (!isCompleted) {
             logger.warning("Client setup failed. Terminate measurement.");
             System.exit(1);
         }

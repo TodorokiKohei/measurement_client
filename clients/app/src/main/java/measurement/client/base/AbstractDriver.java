@@ -16,14 +16,40 @@ public abstract class AbstractDriver {
         this.commonConfigs = configs;
     }
 
-    public abstract MeasurementConfigs<? extends CommonPubConfigs, ? extends CommonSubConfigs> loadConfigs(String fileName);
-    // public abstract AbstractPublisher createPublisher(AbstractPublisherConfigs pubConfigs);
-    // public abstract AbstractPublisher createSubscriber(AbstractPublisherConfigs subConfigs);
+    public abstract MeasurementConfigs<? extends CommonPubConfigs, ? extends CommonSubConfigs> loadConfigs(
+            String fileName);
 
-    public abstract Boolean setupClients();
+    public abstract AbstractPublisher createPublisher(int clientNumber, long interval);
+
+    public abstract AbstractSubscriber createSubscriber(int clientNumber);
+
+    // public abstract Boolean setupClients();
+    public Boolean setupClients() {
+        Boolean isCompleted = true;
+
+        CommonPubConfigs cPubConfigs = commonConfigs.getPubConf();
+        if (cPubConfigs != null) {
+            long interval = Utils.calcMicroSecInterval(cPubConfigs.getMessageRate(), cPubConfigs.getMessageSize());
+            for (int i = 0; i < cPubConfigs.getNumber(); i++) {
+                AbstractPublisher pub = createPublisher(i, interval);
+                isCompleted &= pub.isConnected();
+                publisher.add(pub);
+            }
+        }
+
+        CommonSubConfigs cSubConfigs = commonConfigs.getSubConf();
+        if (cSubConfigs != null) {
+            for (int i = 0; i < cSubConfigs.getNumber(); i++) {
+                AbstractSubscriber sub = createSubscriber(i);
+                isCompleted &= sub.isConnected();
+                subscriber.add(sub);
+            }
+        }
+        return isCompleted;
+    }
 
     public void setupRecoder(String outputDir) {
-        if (!commonConfigs.getRecordMessage())
+        if (commonConfigs.getSubConf() == null || !commonConfigs.getSubConf().getRecordMessage())
             return;
         this.recorder = new Recorder(outputDir);
         for (AbstractClient client : subscriber) {
@@ -39,7 +65,8 @@ public abstract class AbstractDriver {
             sub.start();
         }
         try {
-            Measurement.logger.info("Wait " + commonConfigs.getSubscriberFallTime() + " seconds before publisher start.");
+            Measurement.logger
+                    .info("Wait " + commonConfigs.getSubscriberFallTime() + " seconds before publisher start.");
             TimeUnit.SECONDS.sleep(commonConfigs.getPublisherRiseTime());
         } catch (Exception e) {
         }
@@ -50,7 +77,8 @@ public abstract class AbstractDriver {
 
     public void waitForMeasurement() {
         try {
-            long sleepTime = commonConfigs.getExecTime() - commonConfigs.getPublisherRiseTime() - commonConfigs.getSubscriberFallTime();
+            long sleepTime = commonConfigs.getExecTime() - commonConfigs.getPublisherRiseTime()
+                    - commonConfigs.getSubscriberFallTime();
             Measurement.logger.info("Wait " + sleepTime + " seconds for measurement.");
             TimeUnit.SECONDS.sleep(sleepTime);
         } catch (Exception e) {
@@ -62,7 +90,8 @@ public abstract class AbstractDriver {
             pub.terminate();
         }
         try {
-            Measurement.logger.info("Wait " + commonConfigs.getSubscriberFallTime() + " seconds before subscrber terminate.");
+            Measurement.logger
+                    .info("Wait " + commonConfigs.getSubscriberFallTime() + " seconds before subscrber terminate.");
             TimeUnit.SECONDS.sleep(commonConfigs.getSubscriberFallTime());
         } catch (Exception e) {
         }

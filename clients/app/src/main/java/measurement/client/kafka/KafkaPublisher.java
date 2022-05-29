@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 
 import measurement.client.Measurement;
 import measurement.client.base.AbstractPublisher;
@@ -33,8 +34,7 @@ public class KafkaPublisher extends AbstractPublisher{
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(payload);
             ProducerRecord<String, byte[]> message = new ProducerRecord<String,byte[]>(topicName, json.getBytes());
-            producer.send(message).get();
-            // RecordMetadata rMetadata = producer.send(message).get();
+            RecordMetadata rMetadata = producer.send(message).get();
             // producer.send(message);
             record = new Record(payload, json.length(), clientId);
         } catch (Exception e) {

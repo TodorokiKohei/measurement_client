@@ -2,20 +2,24 @@ package measurement.client.sample;
 
 import java.util.Properties;
 
-import org.apache.kafka.clients.producer.Callback;
+// import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
+// import org.apache.kafka.clients.producer.ProducerConfig;
+// import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 public class KafkaPub {
     public static void main(String[] args) {
         Properties properties = new Properties();
-        properties.setProperty("bootstrap.servers", "kafka-1:9092");
+        properties.setProperty("bootstrap.servers", "kafka-1:9093");
         properties.setProperty("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         properties.setProperty("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+        // properties.setProperty("ssl.truststore.location", "app/src/main/configs/kafka.client.truststore.jks");
+        properties.setProperty("security.protocol", "SSL");
+        properties.setProperty("ssl.truststore.location", "./src/main/configs/kafka.client.truststore.jks");
+        properties.setProperty("ssl.truststore.password", "todo0811");
         properties.setProperty("acks", "1");
         Producer<String, byte[]> producer = new KafkaProducer<>(properties);
         String topicName = "test-topic-2";

@@ -11,11 +11,15 @@ pubConf:
   topicName: "test-topic"
   properties:
     bootstrap.servers: "kafka-1:9092"
+    acks: "1"
+
 
 subConf:
   number: 1
+  recordMessage: true
   maxWait: 500
   topicName: "test-topic"
   properties:
     bootstrap.servers: "kafka-1:9092"
     group.id: "consumer-group"
+    acks: "1"

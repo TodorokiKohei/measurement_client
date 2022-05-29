@@ -1,22 +1,20 @@
 package measurement.client.jetstream;
 
 import java.io.FileNotFoundException;
-import java.io.InputStream;
-
-import org.yaml.snakeyaml.Yaml;
 
 import measurement.client.Measurement;
 import measurement.client.base.MeasurementConfigs;
 import measurement.client.base.CommonPubConfigs;
 import measurement.client.base.CommonSubConfigs;
 import measurement.client.base.AbstractDriver;
+import measurement.client.base.AbstractPublisher;
+import measurement.client.base.AbstractSubscriber;
 import measurement.client.base.Utils;
 
 public class JetStreamDriver extends AbstractDriver {
 
     private static final String resourceName = "/jetstreamconf.yaml";
-
-    private MeasurementConfigs<JetStreamPubConfigs, JetStreamSubConfigs> jetStreamConfigs;
+    private JetStreamConfigs jetStreamConfigs;
 
     public MeasurementConfigs<? extends CommonPubConfigs, ? extends CommonSubConfigs> loadConfigs(String fileName) {
         try {
@@ -25,81 +23,46 @@ public class JetStreamDriver extends AbstractDriver {
             Measurement.logger.warning(e.getMessage());
             e.printStackTrace();
             System.exit(1);
-        }        
+        }
         return jetStreamConfigs;
     }
 
     @Override
-    public Boolean setupClients() {
-        Boolean isCompleted = true;
-
-        JetStreamPubConfigs jspc = jetStreamConfigs.getPubConf();
-        if (jspc != null) {
-            isCompleted &= createPublisher(jspc);
-        }
-
-        JetStreamSubConfigs jssc = jetStreamConfigs.getSubConf();
-        if (jssc != null) {
-            isCompleted &= createSubscriber(jssc);
-        }
-        return isCompleted;
+    public AbstractPublisher createPublisher(int clientNumber, long interval) {
+        JetStreamPubConfigs jPubConfigs = jetStreamConfigs.getPubConf();
+        JetStreamPublisher jsPub = new JetStreamPublisher(
+                "jetstream-publisher-" + clientNumber,
+                interval,
+                (int) Utils.byteStringToDouble(jPubConfigs.getMessageSize()),
+                jPubConfigs.getServer(),
+                jPubConfigs.getStream(),
+                jPubConfigs.getSubject());
+        return jsPub;
     }
 
-    private boolean createPublisher(JetStreamPubConfigs jspc) {
-        // Publishのメッセージ間隔をμsec単位で計算
-        long interval = Utils.calcMicroSecInterval(jspc.getMessageRate(), jspc.getMessageSize());
-
-        // Publisherの作成
-        Boolean allOk = true;
-        for (int i = 0; i < jetStreamConfigs.getPubConf().getNumber(); i++) {
-            JetStreamPublisher jsPub = new JetStreamPublisher(
-                    "jetstream-publisher-" + i,
-                    interval,
-                    (int) Utils.byteStringToDouble(jspc.getMessageSize()),
-                    jspc.getServer(),
-                    jspc.getStream(),
-                    jspc.getSubject());
-
-            publisher.add(jsPub);
-            allOk &= jsPub.isConnected();
+    @Override
+    public AbstractSubscriber createSubscriber(int clientNumber) {
+        JetStreamSubConfigs jSubConfigs = jetStreamConfigs.getSubConf();
+        JetStreamSubscriber jsSub = null;
+        if (jSubConfigs.getMode() == JetStreamSubMode.pull) {
+            jsSub = new JetStreamPullSubscriber(
+                    "jetstream-subscriber-pull-" + clientNumber,
+                    jSubConfigs.getServer(),
+                    jSubConfigs.getStream(),
+                    jSubConfigs.getSubject(),
+                    jSubConfigs.getDurable(),
+                    jSubConfigs.getBatchSize(),
+                    jSubConfigs.getMaxWait());
+        } else if (jSubConfigs.getMode() == JetStreamSubMode.push) {
+            jsSub = new JetStreamPushSubscriber(
+                    "jetstream-subscriber-push-" + clientNumber,
+                    jSubConfigs.getServer(),
+                    jSubConfigs.getStream(),
+                    jSubConfigs.getSubject(),
+                    jSubConfigs.getDurable(),
+                    jSubConfigs.getMaxWait(),
+                    jSubConfigs.getQueueGroup());
         }
-        return allOk;
-    }
-
-    private boolean createSubscriber(JetStreamSubConfigs jssc) {
-
-        if (jssc.getMode() == JetStreamSubMode.pull)
-            Measurement.logger.info("Create subscriber in mode of pull");
-        else if (jssc.getMode() == JetStreamSubMode.push)
-            Measurement.logger.info("Create subscriber in mode of push");
-
-        // Subscriberの作成
-        Boolean allOk = true;
-        for (int i = 0; i < jetStreamConfigs.getSubConf().getNumber(); i++) {
-            if (jssc.getMode() == JetStreamSubMode.pull) {
-                JetStreamPullSubscriber jsPullSub = new JetStreamPullSubscriber(
-                    "subscriber-pull-" + i,
-                    jssc.getServer(),
-                    jssc.getStream(),
-                    jssc.getSubject(),
-                    jssc.getDurable(),
-                    jssc.getBatchSize(),
-                    jssc.getMaxWait());
-                subscriber.add(jsPullSub);
-                allOk &= jsPullSub.isConnected();
-            } else if (jssc.getMode() == JetStreamSubMode.push) {
-                JetStreamPushSubscriber jsPushSub = new JetStreamPushSubscriber(
-                    "subscriber-push-" + i,
-                    jssc.getServer(),
-                    jssc.getStream(),
-                    jssc.getSubject(),
-                    jssc.getDurable(),
-                    jssc.getMaxWait(),
-                    jssc.getQueueGroup());
-                subscriber.add(jsPushSub);
-                allOk &= jsPushSub.isConnected();
-            }
-        }
-        return allOk;
+        return jsSub;
     }
 }

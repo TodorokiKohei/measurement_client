@@ -1,7 +1,7 @@
 package measurement.client.base;
 
 public class CommonSubConfigs extends CommonClientConfigs{
-    private Boolean recordMessage;
+    private Boolean recordMessage = false;
 
     public Boolean getRecordMessage() {
         return recordMessage;

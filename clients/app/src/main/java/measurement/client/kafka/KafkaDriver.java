@@ -3,68 +3,50 @@ package measurement.client.kafka;
 import java.io.FileNotFoundException;
 
 import measurement.client.Measurement;
-import measurement.client.base.CommonConfigs;
+import measurement.client.base.MeasurementConfigs;
 import measurement.client.base.AbstractDriver;
+import measurement.client.base.AbstractPublisher;
+import measurement.client.base.AbstractSubscriber;
+import measurement.client.base.CommonPubConfigs;
+import measurement.client.base.CommonSubConfigs;
 import measurement.client.base.Utils;
 
 public class KafkaDriver extends AbstractDriver {
     private static final String resourceName = "/kafkaconf.yaml";
-    private KafkaConfigs kafkaConfigs;
+    private MeasurementConfigs<KafkaPubConfigs, KafkaSubConfigs> kafkaConfigs;
 
     @Override
-    public CommonConfigs loadConfigs(String fileName) {
+    public MeasurementConfigs<? extends CommonPubConfigs, ? extends CommonSubConfigs> loadConfigs(String fileName) {
         try {
             kafkaConfigs = Utils.loadConfigsFromYaml(resourceName, fileName, KafkaConfigs.class);
         } catch (FileNotFoundException e) {
             Measurement.logger.warning(e.getMessage());
             e.printStackTrace();
             System.exit(1);
-        }        
+        }
         return kafkaConfigs;
     }
 
     @Override
-    public Boolean setupClients() {
-        Boolean isCompleted = true;
-        KafkaPubConfigs pubConf = kafkaConfigs.getPubConf();
-        if (pubConf != null){
-            isCompleted &= createPublisher(pubConf);
-        }
-
-        KafkaSubConfigs subConf = kafkaConfigs.getSubConf();
-        if (subConf != null){
-            isCompleted &= createSubscriber(subConf);
-        }
-        return isCompleted;
-    }
-
-    private Boolean createPublisher(KafkaPubConfigs pubConf){
-        Boolean allOk = true;
-        long interval = Utils.calcMicroSecInterval(pubConf.getMessageRate(), pubConf.getMessageSize());
-        for(int i = 0; i < pubConf.getNumber(); i++){
-            KafkaPublisher kafkaPublisher = new KafkaPublisher(
-                "kafka-publisher-"+i,
+    public AbstractPublisher createPublisher(int clientNumber, long interval) {
+        KafkaPubConfigs kPubConfigs = kafkaConfigs.getPubConf();
+        KafkaPublisher kafkaPublisher = new KafkaPublisher(
+                "kafka-publisher-" + clientNumber,
                 interval,
-                (int) Utils.byteStringToDouble( pubConf.getMessageSize()), 
-                pubConf.getTopicName(), 
-                pubConf.getProperties());
-            publisher.add(kafkaPublisher);
-            allOk &= kafkaPublisher.isConnected();
-        }
-        return allOk;
+                (int) Utils.byteStringToDouble(kPubConfigs.getMessageSize()),
+                kPubConfigs.getTopicName(),
+                kPubConfigs.getProperties());
+        return kafkaPublisher;
     }
 
-    private Boolean createSubscriber(KafkaSubConfigs subConf){
-        Boolean allOk = true;
-        for(int i = 0; i < subConf.getNumber(); i++){
-            KafkaSubscriber kafkaSubscriber = new KafkaSubscriber(
-                "kafka-subscriber-"+i,
-                subConf.getTopicName(), 
-                subConf.getMaxWait(),
-                subConf.getProperties());
-            subscriber.add(kafkaSubscriber);
-            allOk &= kafkaSubscriber.isConnected();
-        }
-        return allOk;
+    @Override
+    public AbstractSubscriber createSubscriber(int clientNumber) {
+        KafkaSubConfigs kSubConfigs = kafkaConfigs.getSubConf();
+        KafkaSubscriber kafkaSubscriber = new KafkaSubscriber(
+                "kafka-subscriber-" + clientNumber,
+                kSubConfigs.getTopicName(),
+                kSubConfigs.getMaxWait(),
+                kSubConfigs.getProperties());
+        return kafkaSubscriber;
     }
 }

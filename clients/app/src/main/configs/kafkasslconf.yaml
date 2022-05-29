@@ -1,0 +1,31 @@
+
+execTime: 30
+recordMessage: true
+publisherRiseTime: 5
+subscriberFallTime: 5
+
+pubConf:
+  number: 1
+  # messageRate: 1kb
+  messageSize: 1kb
+  topicName: "test-topic"
+  properties:
+    bootstrap.servers: "kafka-1:9093"
+    security.protocol: "SSL"
+    ssl.truststore.location: "./src/main/configs/kafka.client.truststore.jks"
+    ssl.truststore.password: "todo0811"
+    acks: "0"
+
+
+subConf:
+  number: 1
+  recordMessage: true
+  maxWait: 500
+  topicName: "test-topic"
+  properties:
+    bootstrap.servers: "kafka-1:9093"
+    security.protocol: "SSL"
+    ssl.truststore.location: "./src/main/configs/kafka.client.truststore.jks"
+    ssl.truststore.password: "todo0811"
+    group.id: "consumer-group"
+    acks: "0"

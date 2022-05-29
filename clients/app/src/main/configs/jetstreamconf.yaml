@@ -10,6 +10,8 @@ pubConf:
   number: 1
 
 subConf:
+  number: 1
+  recordMessage: true
   server: "nats://nats-1"
   stream: "STREAM"
   subject: "STREAM.pull"
@@ -17,4 +19,3 @@ subConf:
   mode: pull
   batchSize: 1
   maxWait: 50
-  number: 1

@@ -7,11 +7,12 @@ pubConf:
   stream: "STREAM"
   subject: "STREAM.push"
   # messageRate: "1kB"
-  messageSize: "100kb"
-  # messageSize: "1kb"
+  # messageSize: "100kb"
+  messageSize: "1kb"
 
 subConf:
   number: 1
+  recordMessage: true
   server: "nats://nats-1"
   stream: "STREAM"
   subject: "STREAM.push"
