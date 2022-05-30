@@ -4,11 +4,12 @@ publisherRiseTime: 5
 subscriberFallTime: 5
 
 pubConf:
+  number: 1
   server: "nats://nats-1"
   subject: "test-subject"
   # messageRate: "1kB"
   messageSize: "1kB"
-  number: 1
+  
 
 subConf:
   number: 2

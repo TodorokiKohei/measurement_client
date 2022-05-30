@@ -161,13 +161,16 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
             return;
         }
 
-        Measurement.logger.info(clientId + " results.");
+        Measurement.logger.info("Outputs the first 10 results for " + clientId);
+        int count = 0;
         Iterator<Map.Entry<Long, Long[]>> itr = throuputMap.entrySet().iterator();
         while (itr.hasNext()) {
             Map.Entry<Long, Long[]> entry = itr.next();
             try {
                 bw.append(entry.getKey() + "," + entry.getValue()[0] + "," + entry.getValue()[1]);
                 bw.newLine();
+                count++;
+                if (count > 5) continue;
                 Measurement.logger.info("time: " + entry.getKey() + ", throuput(msg/sec): " + entry.getValue()[0]
                         + ",  throuput(byte/sec): " + entry.getValue()[1]);
             } catch (Exception e) {

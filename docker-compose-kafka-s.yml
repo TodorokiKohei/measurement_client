@@ -24,7 +24,7 @@ services:
   zoo-1:
     container_name: zoo-1
     hostname: zoo-1
-    image: confluentinc/cp-zookeeper
+    image: confluentinc/cp-zookeeper:6.2.4
     environment:
       <<: *zoo-envs
 
@@ -32,7 +32,7 @@ services:
     user: root
     container_name: kafka-1
     hostname: kafka-1
-    image: confluentinc/cp-kafka
+    image: confluentinc/cp-kafka:6.2.4
     depends_on:
       - zoo-1
     volumes:

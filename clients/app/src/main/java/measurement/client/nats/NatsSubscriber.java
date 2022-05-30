@@ -7,13 +7,30 @@ import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.nats.client.Connection;
+import io.nats.client.Consumer;
+import io.nats.client.ErrorListener;
 import io.nats.client.Message;
 import io.nats.client.Nats;
+import io.nats.client.Options;
 import io.nats.client.Subscription;
 import measurement.client.Measurement;
 import measurement.client.base.AbstractSubscriber;
 import measurement.client.base.Payload;
 import measurement.client.base.Record;
+
+class SlowConsumerReporter implements ErrorListener {
+    private Boolean isDisplayed = false;
+    public void errorOccurred(Connection conn, String error){
+    }
+    public void exceptionOccurred(Connection conn, Exception exp) {
+    }
+    public void slowConsumerDetected(Connection conn, Consumer consumer) {
+        if (isDisplayed)
+            return;
+        Measurement.logger.warning("\n*********************************************\nA slow consumer dropped messages.\n*********************************************");
+        isDisplayed = true;
+    }
+}
 
 public class NatsSubscriber extends AbstractSubscriber {
     private long maxWait;
@@ -24,7 +41,12 @@ public class NatsSubscriber extends AbstractSubscriber {
         super(clientId);
         this.maxWait = maxWait;
         try {
-            nc = Nats.connect(server);
+            Options options = new Options.Builder().
+                server(server).
+                errorListener(new SlowConsumerReporter()).
+                build();
+            nc = Nats.connect(options);
+            // nc = Nats.connect(server);
             if (queueGroup != null){
                 sub = nc.subscribe(subject, queueGroup);
             }else{

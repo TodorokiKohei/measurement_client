@@ -22,6 +22,15 @@
         },
         {
             "type": "java",
+            "name": "Launch Nats Measurement",
+            "request": "launch",
+            "mainClass": "measurement.client.Measurement",
+            "projectName": "app",
+            "args": "-d nats",
+            "cwd": "${workspaceFolder}/app"
+        },
+        {
+            "type": "java",
             "name": "Launch JetStream Measurement",
             "request": "launch",
             "mainClass": "measurement.client.Measurement",
