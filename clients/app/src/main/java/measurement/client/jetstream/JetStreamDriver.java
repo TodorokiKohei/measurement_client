@@ -34,6 +34,7 @@ public class JetStreamDriver extends AbstractDriver {
                 "jetstream-publisher-" + clientNumber,
                 interval,
                 (int) Utils.byteStringToDouble(jPubConfigs.getMessageSize()),
+                jPubConfigs.getPubAsync(),
                 jPubConfigs.getServer(),
                 jPubConfigs.getStream(),
                 jPubConfigs.getSubject());

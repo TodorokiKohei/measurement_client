@@ -8,11 +8,14 @@ import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.LongAdder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -24,23 +27,27 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
     protected long interval;
     protected int messageSize;
     protected int lastMessageNum;
+    protected Boolean pubAsync;
 
     protected volatile String messageData;
     protected volatile boolean isTerminated;
-    protected Map<Long, Long[]> throuputMap;
+    protected ConcurrentMap<Long, LongAdder> totalMsgMap;
+    protected ConcurrentMap<Long, LongAdder> totalByteMap;
 
     protected ScheduledExecutorService service;
     protected ScheduledFuture<?> future;
 
-    public AbstractPublisher(String clientId, long interval, int messageSize) {
+    public AbstractPublisher(String clientId, long interval, int messageSize, Boolean pubAsync) {
         super(clientId);
         this.interval = interval;
         this.messageSize = messageSize;
         this.lastMessageNum = -1;
+        this.pubAsync = pubAsync;
 
         this.messageData = null;
         this.isTerminated = false;
-        this.throuputMap = new TreeMap<Long, Long[]>();
+        this.totalMsgMap = new ConcurrentSkipListMap<Long, LongAdder>();
+        this.totalByteMap = new ConcurrentSkipListMap<Long, LongAdder>();
     }
 
     protected Payload createPayload() {
@@ -85,32 +92,34 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
     public void start() {
         Measurement.logger.info("Start " + clientId + ".");
         service = Executors.newSingleThreadScheduledExecutor();
+        String asyncOrSync = pubAsync ? "async" : "sync";
         if (interval == 0) {
-            Measurement.logger.info("Start continuing publish.");
+            Measurement.logger.info("Start continuing " + asyncOrSync + " publish.");
             future = service.schedule(this, 0, TimeUnit.MICROSECONDS);
         } else {
-            Measurement.logger.info("Start interval publish.(interval:" + interval + " [μsec])");
+            Measurement.logger.info("Start interval "+ asyncOrSync + " publish.(interval:" + interval + " [μsec])");
             future = service.scheduleAtFixedRate(this, 0, interval, TimeUnit.MICROSECONDS);
         }
     }
 
     private void recordThrouput(Record record) {
         Long sentTimeSec = record.getSentTime() / 1000;
-        if (throuputMap.containsKey(sentTimeSec)) {
-            Long[] array = throuputMap.get(sentTimeSec);
-            array[0]++;
-            array[1] += record.getSize();
-        } else {
-            throuputMap.put(sentTimeSec, new Long[] { 1L, record.getSize().longValue() });
-        }
+        totalMsgMap.computeIfAbsent(sentTimeSec, k -> new LongAdder()).increment();;
+        totalByteMap.computeIfAbsent(sentTimeSec, k -> new LongAdder()).add(record.getSize());
     }
 
     @Override
     public void run() {
         if (interval == 0) {
-            continuingPublish();
+            if (pubAsync)
+                continuingPublishAsync();
+            else
+                continuingPublish();
         } else {
-            intervalPublish();
+            if (pubAsync)
+                intervalPublishAsync();
+            else
+                intervalPublish();
         }
     }
 
@@ -122,12 +131,33 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
         }
     }
 
+    public void continuingPublishAsync(){
+        while (!isTerminated) {
+            CompletableFuture<Record> future = publishAsync();
+            future.thenAccept((record) -> {
+                recordThrouput(record);
+            });
+        }
+    }
+
     // スレッドは1回Publishして終了する
     public void intervalPublish() {
         if (!isTerminated) {
             Record record = publish();
             if (record != null)
                 recordThrouput(record);
+        }
+    }
+
+    public void intervalPublishAsync() {
+        if (!isTerminated) {
+            CompletableFuture<Record> future = publishAsync();
+            future.thenAccept((record) -> {
+                recordThrouput(record);
+            }).exceptionally(ex -> {
+                Measurement.logger.warning("Write error on massage:" + ex.getMessage());
+                return null;
+            });
         }
     }
 
@@ -163,22 +193,24 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
 
         Measurement.logger.info("Outputs the first 10 results for " + clientId);
         int count = 0;
-        Iterator<Map.Entry<Long, Long[]>> itr = throuputMap.entrySet().iterator();
+        Iterator<Map.Entry<Long, LongAdder>> itr = totalMsgMap.entrySet().iterator();
         while (itr.hasNext()) {
-            Map.Entry<Long, Long[]> entry = itr.next();
+            Map.Entry<Long, LongAdder> entry = itr.next();
             try {
-                bw.append(entry.getKey() + "," + entry.getValue()[0] + "," + entry.getValue()[1]);
+                Long sumTotalMsg = entry.getValue().sum();
+                Long sumTotalByte = totalByteMap.get(entry.getKey()).sum();
+                bw.append(entry.getKey() + "," + sumTotalMsg + "," + sumTotalByte);
                 bw.newLine();
                 count++;
-                if (count > 5) continue;
-                Measurement.logger.info("time: " + entry.getKey() + ", throuput(msg/sec): " + entry.getValue()[0]
-                        + ",  throuput(byte/sec): " + entry.getValue()[1]);
+                if (count > 5)
+                    continue;
+                Measurement.logger.info("time: " + entry.getKey() + ", throuput(msg/sec): " + sumTotalMsg
+                        + ",  throuput(byte/sec): " + sumTotalByte);
             } catch (Exception e) {
                 Measurement.logger.warning("Failed to write results of throuput.(" + clientId + ")");
                 return;
             }
         }
-
         try {
             bw.flush();
             bw.close();
@@ -187,4 +219,5 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
     }
 
     public abstract Record publish();
+    public abstract CompletableFuture<Record> publishAsync();
 }

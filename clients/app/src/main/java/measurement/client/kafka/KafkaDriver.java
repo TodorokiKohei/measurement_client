@@ -34,6 +34,7 @@ public class KafkaDriver extends AbstractDriver {
                 "kafka-publisher-" + clientNumber,
                 interval,
                 (int) Utils.byteStringToDouble(kPubConfigs.getMessageSize()),
+                kPubConfigs.getPubAsync(),
                 kPubConfigs.getTopicName(),
                 kPubConfigs.getProperties());
         return kafkaPublisher;

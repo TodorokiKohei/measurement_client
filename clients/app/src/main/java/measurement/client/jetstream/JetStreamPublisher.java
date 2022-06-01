@@ -6,6 +6,7 @@ import measurement.client.base.Payload;
 import measurement.client.base.Record;
 
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -24,9 +25,9 @@ public class JetStreamPublisher extends AbstractPublisher {
 
     private String subject;
 
-    public JetStreamPublisher(String clientId, long interval, int messageSize, String server, String stream,
+    public JetStreamPublisher(String clientId, long interval, int messageSize, Boolean pubAsync, String server, String stream,
             String subject) {
-        super(clientId, interval, messageSize);
+        super(clientId, interval, messageSize, pubAsync);
         this.subject = subject;
 
         Builder builder = PublishOptions.builder();
@@ -59,8 +60,31 @@ public class JetStreamPublisher extends AbstractPublisher {
             e.printStackTrace();
             // this.isTerminated = true;
         }
-        // 処理したメッセージ数を返す
+        
         return record;
+    }
+
+    @Override
+    public CompletableFuture<Record> publishAsync() {
+        CompletableFuture<Record> future = new CompletableFuture<>();
+        Payload payload = createPayload();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(payload);
+            final Record record = new Record(payload, json.length(), clientId);
+            js.publishAsync(subject, json.getBytes(), pubOptions).thenAccept(pa -> {
+                future.complete(record);
+            }).exceptionally(exception -> {
+                future.completeExceptionally(exception);
+                return null;
+            });
+        } catch (Exception e) {
+            Measurement.logger.warning("Error sending message.\n" + e.getMessage());
+            e.printStackTrace();
+            // this.isTerminated = true;
+        }
+        
+        return future;
     }
 
     @Override

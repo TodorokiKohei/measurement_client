@@ -1,5 +1,7 @@
 package measurement.client.nats;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.nats.client.Connection;
@@ -14,7 +16,7 @@ public class NatsPublisher extends AbstractPublisher {
     private Connection nc;
 
     public NatsPublisher(String clientId, long interval, int messageSize, String server, String subject) {
-        super(clientId, interval, messageSize);
+        super(clientId, interval, messageSize, false);
         this.subject = subject;
         try {
             nc = Nats.connect(server);
@@ -39,6 +41,12 @@ public class NatsPublisher extends AbstractPublisher {
             }
         }
         return record;
+    }
+
+    @Override
+    public CompletableFuture<Record> publishAsync() {
+        // No need to implement.
+        return null;
     }
 
     @Override

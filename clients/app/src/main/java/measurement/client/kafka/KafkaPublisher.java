@@ -1,6 +1,7 @@
 package measurement.client.kafka;
 
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -17,8 +18,8 @@ import measurement.client.base.Record;
 public class KafkaPublisher extends AbstractPublisher{
     private String topicName;
     private Producer<String, byte[]> producer;
-    public KafkaPublisher(String clientId, long interval, int messageSize, String topicName, Properties properties){
-        super(clientId, interval, messageSize);
+    public KafkaPublisher(String clientId, long interval, int messageSize, Boolean pubAsync, String topicName, Properties properties){
+        super(clientId, interval, messageSize, pubAsync);
         this.topicName = topicName;
 
         properties.setProperty("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
@@ -35,13 +36,34 @@ public class KafkaPublisher extends AbstractPublisher{
             String json = mapper.writeValueAsString(payload);
             ProducerRecord<String, byte[]> message = new ProducerRecord<String,byte[]>(topicName, json.getBytes());
             RecordMetadata rMetadata = producer.send(message).get();
-            // producer.send(message);
             record = new Record(payload, json.length(), clientId);
         } catch (Exception e) {
             Measurement.logger.warning("Error sending message.\n" + e.getMessage());
             e.printStackTrace();
         }
         return record;
+    }
+
+    public CompletableFuture<Record> publishAsync(){
+        CompletableFuture<Record> future = new CompletableFuture<>();
+        Payload payload = createPayload();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(payload);
+            ProducerRecord<String, byte[]> message = new ProducerRecord<String,byte[]>(topicName, json.getBytes());
+            final Record record = new Record(payload, json.length(), clientId);
+            producer.send(message, (metadata, exeception) -> {
+                if (exeception == null){
+                    future.complete(record);
+                }else{
+                    future.completeExceptionally(exeception);
+                }
+            });
+        } catch (Exception e) {
+            Measurement.logger.warning("Error sending message.\n" + e.getMessage());
+            e.printStackTrace();
+        }
+        return future;
     }
 
     @Override
