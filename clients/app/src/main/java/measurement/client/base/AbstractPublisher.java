@@ -136,6 +136,9 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
             CompletableFuture<Record> future = publishAsync();
             future.thenAccept((record) -> {
                 recordThrouput(record);
+            }).exceptionally(ex -> {
+                Measurement.logger.warning("Write error on massage:" + ex.getMessage());
+                return null;
             });
         }
     }

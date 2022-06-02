@@ -35,7 +35,8 @@ public class KafkaPublisher extends AbstractPublisher{
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(payload);
             ProducerRecord<String, byte[]> message = new ProducerRecord<String,byte[]>(topicName, json.getBytes());
-            RecordMetadata rMetadata = producer.send(message).get();
+            // RecordMetadata rMetadata = producer.send(message);
+            producer.send(message);
             record = new Record(payload, json.length(), clientId);
         } catch (Exception e) {
             Measurement.logger.warning("Error sending message.\n" + e.getMessage());

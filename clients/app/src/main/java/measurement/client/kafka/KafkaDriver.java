@@ -44,8 +44,9 @@ public class KafkaDriver extends AbstractDriver {
     @Override
     public AbstractSubscriber createSubscriber(int clientNumber) {
         KafkaSubConfigs kSubConfigs = kafkaConfigs.getSubConf();
+        String acks = kSubConfigs.getProperties().getProperty("acks", "0");
         KafkaSubscriber kafkaSubscriber = new KafkaSubscriber(
-                "kafka-subscriber-" + clientNumber,
+                "kafka-subscriber-" + clientNumber + "-" + acks,
                 kSubConfigs.getTopicName(),
                 kSubConfigs.getMaxWait(),
                 kSubConfigs.getProperties());
