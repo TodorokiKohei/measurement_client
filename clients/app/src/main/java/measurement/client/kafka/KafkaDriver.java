@@ -30,8 +30,9 @@ public class KafkaDriver extends AbstractDriver {
     @Override
     public AbstractPublisher createPublisher(int clientNumber, long interval) {
         KafkaPubConfigs kPubConfigs = kafkaConfigs.getPubConf();
+        String acks = kPubConfigs.getProperties().getProperty("acks", "0");
         KafkaPublisher kafkaPublisher = new KafkaPublisher(
-                "kafka-publisher-" + clientNumber,
+                "kafka-publisher-" + clientNumber + "-" + acks,
                 interval,
                 (int) Utils.byteStringToDouble(kPubConfigs.getMessageSize()),
                 kPubConfigs.getPubAsync(),

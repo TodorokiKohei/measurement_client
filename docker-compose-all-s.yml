@@ -1,0 +1,101 @@
+version: "3.8"
+
+x-zoo-envs: &zoo-envs
+  ZOOKEEPER_CLIENT_PORT: 2181
+  ZOOKEEPER_TICK_TIME: 2000
+
+x-kafka-envs: &kafka-envs
+  KAFKA_ZOOKEEPER_CONNECT: zoo-1:2181
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  # KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+  # KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  # KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SSL:SSL
+  # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092,SSL://kafka-1:9093
+  # KAFKA_INTER_BROKER_LISTENER_NAME: SSL
+  # KAFKA_SSL_KEYSTORE_FILENAME: kafka.server.keystore.jks
+  # KAFKA_SSL_KEYSTORE_CREDENTIALS: pass.txt
+  # KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.server.truststore.jks
+  # KAFKA_SSL_TRUSTSTORE_CREDENTIALS: pass.txt
+  # KAFKA_SSL_KEY_CREDENTIALS: pass.txt
+  # KAFKA_SSL_CLIENT_AUTH: requested
+  # KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM:
+
+services:
+  zoo-1:
+    container_name: zoo-1
+    hostname: zoo-1
+    image: confluentinc/cp-zookeeper:6.2.4
+    environment:
+      <<: *zoo-envs
+
+  kafka-1:
+    user: root
+    container_name: kafka-1
+    hostname: kafka-1
+    image: confluentinc/cp-kafka:6.2.4
+    depends_on:
+      - zoo-1
+    volumes:
+      - type: bind
+        source: ./kafka-solo/kafka-1/secrets
+        target: /etc/kafka/secrets
+      - type: bind
+        source: ./kafka-solo/client
+        target: /tmp/client/
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092
+      <<: *kafka-envs
+
+  nats-core-1:
+    container_name: "nats-core-1"
+    image: "nats:2.8-alpine"
+    volumes:
+      - type: bind
+        source: "./nats-solo/nats-1/configs"
+        target: "/tmp/configs"
+    command: "-c /tmp/configs/core.conf"
+
+  nats-1:
+    container_name: "nats-1"
+    image: "nats:2.8-alpine"
+    volumes:
+      - type: bind
+        source: "./nats-solo/nats-1/configs"
+        target: "/tmp/configs"
+      - type: volume
+        source: nats-1-data
+        target: "/tmp/data"
+    command: "-c /tmp/configs/js.conf"
+
+  nats-box:
+    container_name: nats-box
+    image: natsio/nats-box
+    volumes:
+      - type: bind
+        source: "./nats-solo/nats-box"
+        target: "/tmp/configs"
+    tty: true
+    stdin_open: true
+    depends_on:
+      - nats-1
+    command: "/tmp/configs/setup_jetsream.sh"
+
+
+  clients:
+    container_name: "clients"
+    build: ./clients
+    volumes:
+      - type: bind
+        source: "./clients"
+        target: "/code"
+    tty: true
+    stdin_open: true
+  
+
+volumes:
+  zoo-1-data:
+  kafka-1-data:
+  nats-1-data:

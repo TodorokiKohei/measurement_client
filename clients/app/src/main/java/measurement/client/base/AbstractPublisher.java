@@ -211,6 +211,7 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
                 return;
             }
         }
+        Measurement.logger.info("Total mssage num: " + lastMessageNum);
         try {
             bw.flush();
             bw.close();

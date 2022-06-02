@@ -1,18 +1,18 @@
 
-execTime: 10
+execTime: 15
 # execTime: 30
 # publisherRiseTime: 5
 # subscriberFallTime: 5
 
-pubConf:
-  number: 1
-  messageSize: 1kb
-  messageRate: 2kb
-  pubAsync: true
-  topicName: "test-topic"
-  properties:
-    bootstrap.servers: "kafka-1:9092"
-    acks: "0"
+# pubConf:
+#   number: 1
+#   messageSize: 1kb
+#   # messageRate: 2kb
+#   pubAsync: true
+#   topicName: "test-topic"
+#   properties:
+#     bootstrap.servers: "kafka-1:9092"
+#     acks: "0"
 
 
 subConf:

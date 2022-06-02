@@ -5,7 +5,9 @@
 build
 bin
 results
+app/src/main/configs/*
 
 .classpath
 org.eclipse.buildship.core.prefs
 org.eclipse.jdt.core.prefs
+

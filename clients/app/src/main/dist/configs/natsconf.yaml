@@ -1,11 +1,12 @@
 
-execTime: 30
-publisherRiseTime: 5
-subscriberFallTime: 5
+execTime: 15
+# publisherRiseTime: 5
+# subscriberFallTime: 5
 
 pubConf:
   number: 1
-  server: "nats://nats-1"
+  # server: "nats://nats-1"
+  server: "nats://nats-core-1"
   subject: "test-subject"
   # messageRate: "1kB"
   messageSize: "1kB"
@@ -14,7 +15,8 @@ pubConf:
 subConf:
   number: 2
   recordMessage: true
-  server: "nats://nats-1"
+  # server: "nats://nats-1"
+  server: "nats://nats-core-1"
   subject: "test-subject"
   maxWait: 50
   queueGroup: "queue-group"

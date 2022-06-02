@@ -1,19 +1,25 @@
 
-execTime: 10
+execTime: 15
+# publisherRiseTime: 5
+# subscriberFallTime: 5
 
 pubConf:
+  number: 1
+  messageSize: "1kB"
+  pubAsync: true
   server: "nats://nats-1"
   stream: "STREAM"
   subject: "STREAM.pull"
-  messageSize: "1kB"
-  number: 1
+  # messageRate: "1kB"
+  
 
 subConf:
+  number: 1
+  recordMessage: true
   server: "nats://nats-1"
   stream: "STREAM"
   subject: "STREAM.pull"
   durable: "pull-consumer"
   mode: pull
-  batchSize: 1
+  batchSize: 30
   maxWait: 50
-  number: 1
