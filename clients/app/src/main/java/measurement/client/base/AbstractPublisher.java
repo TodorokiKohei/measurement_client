@@ -103,7 +103,12 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
     }
 
     private void recordThrouput(Record record) {
-        Long sentTimeSec = record.getSentTime() / 1000;
+        Long sentTimeSec;
+        if (pubAsync){
+            sentTimeSec = Instant.now().getEpochSecond();
+        }else{
+            sentTimeSec = record.getSentTime() / 1000;
+        }
         totalMsgMap.computeIfAbsent(sentTimeSec, k -> new LongAdder()).increment();;
         totalByteMap.computeIfAbsent(sentTimeSec, k -> new LongAdder()).add(record.getSize());
     }
@@ -182,7 +187,7 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
 
     // スループットをファイルに書き込み
     public void recordThrouput(String outputDir) {
-        Path path = Path.of(outputDir, clientId + "-throuput.csv");
+        Path path = Path.of(outputDir, clientId + "-throughput.csv");
         BufferedWriter bw = null;
         try {
             bw = Files.newBufferedWriter(path, Charset.forName("UTF-8"), StandardOpenOption.CREATE,

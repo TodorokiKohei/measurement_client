@@ -84,7 +84,7 @@ public abstract class AbstractSubscriber extends AbstractClient implements Runna
     }
 
     public void recordThrouput(String outputDir) {
-        Path path = Path.of(outputDir, clientId + "-throuput.csv");
+        Path path = Path.of(outputDir, clientId + "-throughput.csv");
         BufferedWriter bw = null;
         try {
             bw = Files.newBufferedWriter(path, Charset.forName("UTF-8"), StandardOpenOption.CREATE,
