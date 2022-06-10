@@ -37,6 +37,8 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
     protected ScheduledExecutorService service;
     protected ScheduledFuture<?> future;
 
+    protected ObjectMapper mapper;
+
     public AbstractPublisher(String clientId, long interval, int messageSize, Boolean pubAsync) {
         super(clientId);
         this.interval = interval;
@@ -48,6 +50,8 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
         this.isTerminated = false;
         this.totalMsgMap = new ConcurrentSkipListMap<Long, LongAdder>();
         this.totalByteMap = new ConcurrentSkipListMap<Long, LongAdder>();
+
+        mapper = new ObjectMapper();
     }
 
     protected Payload createPayload() {

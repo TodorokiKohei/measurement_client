@@ -3,8 +3,6 @@ package measurement.client.kafka;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -32,7 +30,6 @@ public class KafkaPublisher extends AbstractPublisher{
         Payload payload = createPayload();
         Record record = null;
         try {
-            ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(payload);
             ProducerRecord<String, byte[]> message = new ProducerRecord<String,byte[]>(topicName, json.getBytes());
             // RecordMetadata rMetadata = producer.send(message);
@@ -49,7 +46,6 @@ public class KafkaPublisher extends AbstractPublisher{
         CompletableFuture<Record> future = new CompletableFuture<>();
         Payload payload = createPayload();
         try {
-            ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(payload);
             ProducerRecord<String, byte[]> message = new ProducerRecord<String,byte[]>(topicName, json.getBytes());
             final Record record = new Record(payload, json.length(), clientId);

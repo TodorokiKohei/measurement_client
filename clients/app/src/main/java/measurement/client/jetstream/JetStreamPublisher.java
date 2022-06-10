@@ -8,8 +8,6 @@ import measurement.client.base.Record;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.nats.client.Connection;
 import io.nats.client.Nats;
 import io.nats.client.PublishOptions;
@@ -51,7 +49,6 @@ public class JetStreamPublisher extends AbstractPublisher {
         Payload payload = createPayload();
         Record record = null;
         try {
-            ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(payload);
             PublishAck pa = js.publish(subject, json.getBytes(), pubOptions);
             record = new Record(payload, json.length(), clientId);
@@ -69,7 +66,6 @@ public class JetStreamPublisher extends AbstractPublisher {
         CompletableFuture<Record> future = new CompletableFuture<>();
         Payload payload = createPayload();
         try {
-            ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(payload);
             final Record record = new Record(payload, json.length(), clientId);
             js.publishAsync(subject, json.getBytes(), pubOptions).thenAccept(pa -> {
@@ -81,7 +77,6 @@ public class JetStreamPublisher extends AbstractPublisher {
         } catch (Exception e) {
             Measurement.logger.warning("Error sending message.\n" + e.getMessage());
             e.printStackTrace();
-            // this.isTerminated = true;
         }
         
         return future;

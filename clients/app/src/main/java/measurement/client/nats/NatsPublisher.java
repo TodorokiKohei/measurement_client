@@ -2,8 +2,6 @@ package measurement.client.nats;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.nats.client.Connection;
 import io.nats.client.Nats;
 import measurement.client.Measurement;
@@ -31,7 +29,6 @@ public class NatsPublisher extends AbstractPublisher {
         Record record = null;
         if (isConnected()) {
             try {
-                ObjectMapper mapper = new ObjectMapper();
                 String json = mapper.writeValueAsString(payload);
                 nc.publish(subject, json.getBytes());
                 record = new Record(payload, json.length(), clientId);
