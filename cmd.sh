@@ -17,6 +17,14 @@ build_client(){
 	docker push todoroki182814/measurement-client
 }
 
+build_client_arm(){
+	if ! check_current; then
+		return 1
+	fi
+	docker build -f build_arm/Dockerfile -t todoroki182814/measurement-client-arm .
+	docker push todoroki182814/measurement-client-arm
+}
+
 
 rm_data(){
 	if [[ $# != 1 ]]; then
