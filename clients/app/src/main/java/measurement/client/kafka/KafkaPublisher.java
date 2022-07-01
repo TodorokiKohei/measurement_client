@@ -36,8 +36,8 @@ public class KafkaPublisher extends AbstractPublisher{
             producer.send(message);
             record = new Record(payload, json.length(), clientId);
         } catch (Exception e) {
-            Measurement.logger.warning("Error sending message.\n" + e.getMessage());
-            e.printStackTrace();
+            // Measurement.logger.warning("Error sending message.\n" + e.getMessage());
+            // e.printStackTrace();
         }
         return record;
     }
@@ -57,8 +57,8 @@ public class KafkaPublisher extends AbstractPublisher{
                 }
             });
         } catch (Exception e) {
-            Measurement.logger.warning("Error sending message.\n" + e.getMessage());
-            e.printStackTrace();
+            // Measurement.logger.warning("Error sending message.\n" + e.getMessage());
+            // e.printStackTrace();
         }
         return future;
     }

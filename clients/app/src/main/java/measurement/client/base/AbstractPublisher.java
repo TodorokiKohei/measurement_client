@@ -33,6 +33,8 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
     protected volatile boolean isTerminated;
     protected ConcurrentMap<Long, LongAdder> totalMsgMap;
     protected ConcurrentMap<Long, LongAdder> totalByteMap;
+    protected Boolean hasError;
+    protected LongAdder totalErrorMsg;
 
     protected ScheduledExecutorService service;
     protected ScheduledFuture<?> future;
@@ -50,6 +52,8 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
         this.isTerminated = false;
         this.totalMsgMap = new ConcurrentSkipListMap<Long, LongAdder>();
         this.totalByteMap = new ConcurrentSkipListMap<Long, LongAdder>();
+        this.hasError = false;
+        this.totalErrorMsg = new LongAdder();
 
         mapper = new ObjectMapper();
     }
@@ -146,7 +150,11 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
             future.thenAccept((record) -> {
                 recordThrouput(record);
             }).exceptionally(ex -> {
-                Measurement.logger.warning("Write error on massage:" + ex.getMessage());
+                if (!hasError){
+                    Measurement.logger.warning("Write error on massage:" + ex.getMessage());
+                    hasError = true;
+                }
+                totalErrorMsg.increment();
                 return null;
             });
         }
@@ -167,7 +175,11 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
             future.thenAccept((record) -> {
                 recordThrouput(record);
             }).exceptionally(ex -> {
-                Measurement.logger.warning("Write error on massage:" + ex.getMessage());
+                if (!hasError){
+                    Measurement.logger.warning("Write error on massage:" + ex.getMessage());
+                    hasError = true;
+                }
+                totalErrorMsg.increment();
                 return null;
             });
         }
@@ -223,7 +235,24 @@ public abstract class AbstractPublisher extends AbstractClient implements Runnab
                 return;
             }
         }
-        Measurement.logger.info("Total mssage num: " + lastMessageNum);
+        try {
+            bw.flush();
+            bw.close();
+        } catch (Exception e) {
+        }
+
+        path = Path.of(outputDir, clientId + "-result-info.txt");
+        try {
+            bw = Files.newBufferedWriter(path, Charset.forName("UTF-8"), StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING);
+            bw.append("total message: " + (lastMessageNum-1));
+            bw.newLine();
+            bw.append("total error message: " + lastMessageNum);
+            bw.newLine();
+        } catch (Exception e) {
+            Measurement.logger.warning("Failed to write results of result info.(" + clientId + ")");
+            return;
+        }
         try {
             bw.flush();
             bw.close();

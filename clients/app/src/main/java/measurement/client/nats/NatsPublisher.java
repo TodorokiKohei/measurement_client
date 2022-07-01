@@ -33,8 +33,8 @@ public class NatsPublisher extends AbstractPublisher {
                 nc.publish(subject, json.getBytes());
                 record = new Record(payload, json.length(), clientId);
             } catch (Exception e) {
-                Measurement.logger.warning("Error sending message.\n" + e.getMessage());
-                e.printStackTrace();
+                // Measurement.logger.warning("Error sending message.\n" + e.getMessage());
+                // e.printStackTrace();
             }
         }
         return record;

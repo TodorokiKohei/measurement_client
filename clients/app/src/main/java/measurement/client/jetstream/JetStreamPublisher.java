@@ -53,8 +53,8 @@ public class JetStreamPublisher extends AbstractPublisher {
             PublishAck pa = js.publish(subject, json.getBytes(), pubOptions);
             record = new Record(payload, json.length(), clientId);
         } catch (Exception e) {
-            Measurement.logger.warning("Error sending message.\n" + e.getMessage());
-            e.printStackTrace();
+            // Measurement.logger.warning("Error sending message.\n" + e.getMessage());
+            // e.printStackTrace();
             // this.isTerminated = true;
         }
         
@@ -75,8 +75,8 @@ public class JetStreamPublisher extends AbstractPublisher {
                 return null;
             });
         } catch (Exception e) {
-            Measurement.logger.warning("Error sending message.\n" + e.getMessage());
-            e.printStackTrace();
+            // Measurement.logger.warning("Error sending message.\n" + e.getMessage());
+            // e.printStackTrace();
         }
         
         return future;
